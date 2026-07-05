@@ -1,0 +1,95 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "UYCHI MAJLIS",
+  "tags": ["uychi-majlis", "production"],
+  "schemaVersion": 38,
+  "version": 1,
+  "timezone": "Asia/Tashkent",
+  "panels": [
+    {
+      "title": "HTTP Request Rate",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(uychi_majlis_http_requests_total[5m])",
+          "legendFormat": "{{method}} {{route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "P95 Response Time",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(uychi_majlis_http_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "{{method}} {{route}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(uychi_majlis_http_requests_total{status=~\"5..\"}[5m]) / rate(uychi_majlis_http_requests_total[5m]) * 100",
+          "legendFormat": "Error %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Active Connections",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "uychi_majlis_active_connections",
+          "legendFormat": "Active connections",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Queue Sizes",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "uychi_majlis_queue_size",
+          "legendFormat": "{{queue}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "Redis Operations",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "rate(uychi_majlis_redis_operation_duration_seconds_sum[5m]) / rate(uychi_majlis_redis_operation_duration_seconds_count[5m])",
+          "legendFormat": "Avg Redis op duration",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "DB Query Duration",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "rate(uychi_majlis_db_query_duration_seconds_sum[5m]) / rate(uychi_majlis_db_query_duration_seconds_count[5m])",
+          "legendFormat": "Avg query duration",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,551 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+enum AttendanceType {
+  CHECK_IN
+  CHECK_OUT
+}
+
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+  REJECTED
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  ABSENT
+  PRESENT
+}
+
+enum NotificationType {
+  MEETING_REMINDER
+  MEETING_CREATED
+  MEETING_CANCELLED
+  ATTENDANCE_REMINDER
+  SUSPICIOUS_ACTIVITY
+  SYSTEM_ALERT
+}
+
+enum NotificationChannel {
+  SMS
+  PUSH
+  EMAIL
+  BOTH
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  ATTENDANCE_CHECK_IN
+  ATTENDANCE_CHECK_OUT
+  MOCK_LOCATION_ATTEMPT
+  MEETING_CREATED
+  MEETING_CANCELLED
+  MEETING_CONFIRMED
+  EMPLOYEE_CREATED
+  EMPLOYEE_UPDATED
+  EMPLOYEE_DELETED
+  ORGANIZATION_CREATED
+  ORGANIZATION_UPDATED
+  SETTINGS_UPDATED
+  OTP_REQUESTED
+  OTP_VERIFIED
+  OTP_FAILED
+  DEVICE_REGISTERED
+  REPORT_GENERATED
+}
+
+model User {
+  id            String      @id @default(uuid())
+  phone         String      @unique
+  fullName      String?
+  avatarUrl     String?
+  status        UserStatus  @default(ACTIVE)
+  lastLoginAt   DateTime?
+  refreshToken  String?
+  totpSecret    String?
+  totpEnabled   Boolean     @default(false)
+  totpBackupCodes Json?
+  lastKnownIp   String?
+  lastKnownDevice String?
+  languagePreference String  @default("uz")
+  themePreference   String  @default("system")
+  roleId        String?
+  role          Role?       @relation(fields: [roleId], references: [id])
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  departmentId  String?
+  department    Department? @relation(fields: [departmentId], references: [id])
+  headedDepartment Department? @relation("DepartmentHead")
+  employee      Employee?
+  devices       Device[]
+  notifications NotificationLog[]
+  sessions      Session[]
+  apiKeys       ApiKey[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+
+  @@map("users")
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  isSystem    Boolean      @default(false)
+  permissions Permission[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  @@map("roles")
+}
+
+model Permission {
+  id        String   @id @default(uuid())
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id])
+  resource  String
+  action    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([roleId, resource, action])
+  @@map("permissions")
+}
+
+model Organization {
+  id            String       @id @default(uuid())
+  name          String
+  shortName     String?
+  address       String?
+  phone         String?
+  email         String?
+  logoUrl       String?
+  latitude      Float?
+  longitude     Float?
+  geofenceRadius Float?       @default(100)
+  wifiSSID      String?
+  timezone      String       @default("Asia/Tashkent")
+  isActive      Boolean      @default(true)
+  settings      OrganizationSettings?
+  users         User[]
+  departments   Department[]
+  employees     Employee[]
+  meetings      Meeting[]
+  apiKeys       ApiKey[]
+  retentionConfigs DataRetentionConfig[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+
+  @@map("organizations")
+}
+
+model OrganizationSettings {
+  id                    String   @id @default(uuid())
+  organizationId        String   @unique
+  organization          Organization @relation(fields: [organizationId], references: [id])
+  allowSelfieCapture    Boolean  @default(true)
+  requireWiFiMatch      Boolean  @default(false)
+  geofenceRadius        Float    @default(100)
+  checkInWindowStart    String   @default("08:00")
+  checkInWindowEnd      String   @default("10:00")
+  checkOutWindowStart   String   @default("17:00")
+  checkOutWindowEnd     String   @default("19:00")
+  autoGenerateReports   Boolean  @default(true)
+  reportTime            String   @default("18:00")
+  maxOtpAttempts        Int      @default(3)
+  otpExpiryMinutes      Int      @default(5)
+  otpBlockDurationMinutes Int    @default(15)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("organization_settings")
+}
+
+model Department {
+  id             String       @id @default(uuid())
+  name           String
+  code           String?
+  description    String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  headUserId     String?       @unique
+  head           User?        @relation("DepartmentHead", fields: [headUserId], references: [id])
+  users          User[]
+  employees      Employee[]
+  meetings       Meeting[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([organizationId, name])
+  @@map("departments")
+}
+
+model Employee {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id])
+  employeeCode   String       @unique
+  position       String?
+  email          String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  departmentId   String
+  department     Department   @relation(fields: [departmentId], references: [id])
+  dateOfBirth    DateTime?
+  hireDate       DateTime     @default(now())
+  address        String?
+  emergencyContact String?
+  emergencyPhone String?
+  referencePhoto   String?
+  referencePhotoHash String?
+  isActive       Boolean      @default(true)
+  attendance     Attendance[]
+  meetingsOwned  Meeting[]    @relation("MeetingOwner")
+  meetingParticipants MeetingParticipant[]
+  meetingOverseers MeetingOverseer[]
+  sentMessages     Message[]  @relation("SentMessages")
+  receivedMessages Message[]  @relation("ReceivedMessages")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  @@map("employees")
+}
+
+model Attendance {
+  id              String          @id @default(uuid())
+  employeeId      String
+  employee        Employee        @relation(fields: [employeeId], references: [id])
+  organizationId  String?
+  date            DateTime        @db.Date
+  type            AttendanceType
+  timestamp       DateTime        @default(now())
+  latitude        Float?
+  longitude       Float?
+  distance        Float?
+  confidence      ConfidenceLevel?
+  wifiSSID        String?
+  wifiMatched     Boolean         @default(false)
+  mockLocation    Boolean         @default(false)
+  deviceInfo      String?
+  selfiePath      String?
+  selfieHash      String?
+  ipAddress       String?
+  userAgent       String?
+  isVerified      Boolean         @default(false)
+  verifiedById    String?
+  verifiedAt      DateTime?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([employeeId, date, type])
+  @@index([employeeId, date])
+  @@index([date])
+  @@index([organizationId])
+  @@map("attendance")
+}
+
+model Meeting {
+  id              String          @id @default(uuid())
+  title           String
+  agenda          String?
+  description     String?
+  date            DateTime        @db.Date
+  startTime       DateTime
+  endTime         DateTime?
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  isOnline        Boolean         @default(false)
+  meetingLink     String?
+  status          MeetingStatus   @default(SCHEDULED)
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id])
+  departmentId    String?
+  department      Department?     @relation(fields: [departmentId], references: [id])
+  createdById     String
+  createdBy       Employee        @relation("MeetingOwner", fields: [createdById], references: [id])
+  isGlobal        Boolean         @default(false)
+  participants    MeetingParticipant[]
+  overseers       MeetingOverseer[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  @@map("meetings")
+}
+
+model MeetingParticipant {
+  id              String            @id @default(uuid())
+  meetingId       String
+  meeting         Meeting           @relation(fields: [meetingId], references: [id])
+  employeeId      String
+  employee        Employee          @relation(fields: [employeeId], references: [id])
+  status          ParticipantStatus @default(PENDING)
+  confirmedAt     DateTime?
+  attendedAt      DateTime?
+  isPresent       Boolean           @default(false)
+  checkedInAt     DateTime?
+  checkInMethod   String?
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([meetingId, employeeId])
+  @@map("meeting_participants")
+}
+
+model MeetingOverseer {
+  id          String   @id @default(uuid())
+  meetingId   String
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+  employeeId  String
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([meetingId, employeeId])
+  @@map("meeting_overseers")
+}
+
+model OtpCode {
+  id          String   @id @default(uuid())
+  phone       String
+  codeHash    String
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  isUsed      Boolean  @default(false)
+  isBlocked   Boolean  @default(false)
+  blockedUntil DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([phone, expiresAt])
+  @@map("otp_codes")
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  deviceId    String
+  deviceName  String?
+  platform    String?
+  osVersion   String?
+  appVersion  String?
+  pushToken   String?
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, deviceId])
+  @@map("devices")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  channel   NotificationChannel
+  title     String
+  body      String?
+  data      Json?
+  metadata  Json?
+  scheduledAt DateTime?
+  sentAt    DateTime?
+  status    String           @default("PENDING")
+  error     String?
+  logs      NotificationLog[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("notifications")
+}
+
+model NotificationLog {
+  id             String           @id @default(uuid())
+  userId         String?
+  user           User?            @relation(fields: [userId], references: [id])
+  notificationId String?
+  notification   Notification?    @relation(fields: [notificationId], references: [id])
+  type           NotificationType
+  channel        NotificationChannel
+  title          String?
+  body           String?
+  recipient      String?
+  subject        String?
+  status         String?
+  error          String?
+  sentAt         DateTime?
+  data           Json?
+  isRead         Boolean          @default(false)
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@map("notification_logs")
+}
+
+model Session {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token       String   @unique
+  ipAddress   String?
+  deviceInfo  String?
+  location    String?
+  userAgent   String?
+  isActive    Boolean  @default(true)
+  lastActivity DateTime @default(now())
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+model ApiKey {
+  id                String    @id @default(uuid())
+  name              String
+  keyHash           String    @unique
+  keyPrefix         String
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId    String?
+  organization      Organization? @relation(fields: [organizationId], references: [id])
+  permissions       Json      @default("[]")
+  allowedIps        Json      @default("[]")
+  rateLimitPerMinute Int      @default(60)
+  isActive          Boolean   @default(true)
+  lastUsedAt        DateTime?
+  expiresAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([keyPrefix])
+  @@index([organizationId])
+  @@map("api_keys")
+}
+
+model DataRetentionConfig {
+  id              String   @id @default(uuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  entityType      String
+  retentionDays   Int      @default(365)
+  action          String   @default("DELETE")
+  isEnabled       Boolean  @default(true)
+  lastCleanupAt   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([organizationId, entityType])
+  @@map("data_retention_config")
+}
+
+model AppVersion {
+  id            String   @id @default(uuid())
+  platform      String
+  version       String
+  buildNumber   Int
+  minVersion    String
+  minBuildNumber Int
+  updateUrl     String?
+  releaseNotes  String?
+  isForceUpdate Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  publishedAt   DateTime?
+
+  @@unique([platform, version])
+  @@map("app_versions")
+}
+
+model AuditLog {
+  id            String       @id @default(uuid())
+  action        AuditAction
+  actorId       String?
+  actorType     String?
+  description   String
+  metadata      Json?
+  ipAddress     String?
+  userAgent     String?
+  previousHash  String?
+  currentHash   String
+  organizationId String?
+  createdAt     DateTime     @default(now())
+
+  @@index([action])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Report {
+  id             String   @id @default(uuid())
+  type           String
+  format         String
+  filters        Json?
+  generatedById  String?
+  filePath       String?
+  fileSize       Int?
+  status         String   @default("PENDING")
+  error          String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("reports")
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  senderId    String
+  sender      Employee  @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId  String
+  receiver    Employee  @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content     String
+  attachments Json      @default("[]")
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([senderId, receiverId])
+  @@map("messages")
+}

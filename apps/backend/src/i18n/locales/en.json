@@ -1,0 +1,99 @@
+{
+  "auth": {
+    "otp_sent": "Verification code sent to your phone number",
+    "otp_invalid": "Invalid verification code",
+    "otp_expired": "Verification code has expired",
+    "otp_blocked": "Too many attempts. Please wait {minutes} minutes",
+    "login_success": "Logged in successfully",
+    "logout_success": "Logged out",
+    "token_refreshed": "Token refreshed",
+    "token_expired": "Token has expired",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden"
+  },
+  "attendance": {
+    "check_in_success": "Check-in recorded",
+    "check_out_success": "Check-out recorded",
+    "already_checked_in": "You have already checked in",
+    "already_checked_out": "You have already checked out",
+    "check_in_required": "Please check in first",
+    "outside_geofence": "You are {distance} meters away from the workplace",
+    "mock_location": "Mock location detected",
+    "no_records": "No attendance records found",
+    "selfie_required": "Selfie photo is required"
+  },
+  "meeting": {
+    "created": "Meeting created",
+    "confirmed": "Participation confirmed",
+    "cancelled": "Meeting cancelled",
+    "not_found": "Meeting not found",
+    "already_confirmed": "You have already confirmed participation",
+    "qr_invalid": "Invalid QR code",
+    "qr_expired": "QR code has expired",
+    "reminder_sent": "Reminder sent"
+  },
+  "organization": {
+    "created": "Organization created",
+    "updated": "Organization updated",
+    "not_found": "Organization not found",
+    "settings_updated": "Settings updated"
+  },
+  "department": {
+    "created": "Department created",
+    "updated": "Department updated",
+    "not_found": "Department not found"
+  },
+  "employee": {
+    "created": "Employee added",
+    "updated": "Employee updated",
+    "deleted": "Employee deleted",
+    "not_found": "Employee not found"
+  },
+  "report": {
+    "generated": "Report generated",
+    "no_data": "No data found for report"
+  },
+  "validation": {
+    "required": "{field} is required",
+    "min_length": "{field} must be at least {min} characters",
+    "max_length": "{field} must not exceed {max} characters",
+    "invalid_format": "Invalid {field} format",
+    "invalid_phone": "Invalid phone number format",
+    "invalid_email": "Invalid email format"
+  },
+  "error": {
+    "internal": "Internal server error",
+    "not_found": "{resource} not found",
+    "conflict": "Resource already exists",
+    "too_many_requests": "Too many requests. Please try again later",
+    "maintenance": "System is under maintenance. Please try again later"
+  },
+  "common": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading",
+    "no_data": "No data",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  },
+  "notification": {
+    "meeting_reminder": "Meeting reminder",
+    "meeting_invite": "Meeting invitation",
+    "attendance_reminder": "Attendance reminder",
+    "report_ready": "Report ready"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "auth": {
+    "otp_sent": "Tasdiqlash kodi telefon raqamingizga yuborildi",
+    "otp_invalid": "Tasdiqlash kodi noto'g'ri",
+    "otp_expired": "Tasdiqlash kodi muddati tugagan",
+    "otp_blocked": "Ko'p urinishlar. {minutes} daqiqa kutib turing",
+    "login_success": "Muvaffaqiyatli kirdingiz",
+    "logout_success": "Tizimdan chiqildi",
+    "token_refreshed": "Token yangilandi",
+    "token_expired": "Token muddati tugagan",
+    "unauthorized": "Avtorizatsiyadan o'tilmagan",
+    "forbidden": "Ruxsat etilmagan"
+  },
+  "attendance": {
+    "check_in_success": "Kirish qayd etildi",
+    "check_out_success": "Chiqish qayd etildi",
+    "already_checked_in": "Siz allaqachon kelishingizni belgilagansiz",
+    "already_checked_out": "Siz allaqachon ketishingizni belgilagansiz",
+    "check_in_required": "Avval kelishni belgilang",
+    "outside_geofence": "Siz ish joyidan {distance} metr uzoqdasiz",
+    "mock_location": "Soxta lokatsiya aniqlandi",
+    "no_records": "Davomat ma'lumotlari topilmadi",
+    "selfie_required": "Selfi surat talab qilinadi"
+  },
+  "meeting": {
+    "created": "Uchrashuv yaratildi",
+    "confirmed": "Qatnashishingiz tasdiqlandi",
+    "cancelled": "Uchrashuv bekor qilindi",
+    "not_found": "Uchrashuv topilmadi",
+    "already_confirmed": "Siz allaqachon qatnashishingizni tasdiqlagansiz",
+    "qr_invalid": "Yaroqsiz QR kod",
+    "qr_expired": "QR kod muddati tugagan",
+    "reminder_sent": "Eslatma yuborildi"
+  },
+  "organization": {
+    "created": "Tashkilot yaratildi",
+    "updated": "Tashkilot yangilandi",
+    "not_found": "Tashkilot topilmadi",
+    "settings_updated": "Sozlamalar yangilandi"
+  },
+  "department": {
+    "created": "Bo'lim yaratildi",
+    "updated": "Bo'lim yangilandi",
+    "not_found": "Bo'lim topilmadi"
+  },
+  "employee": {
+    "created": "Xodim qo'shildi",
+    "updated": "Xodim yangilandi",
+    "deleted": "Xodim o'chirildi",
+    "not_found": "Xodim topilmadi"
+  },
+  "report": {
+    "generated": "Hisobot tayyorlandi",
+    "no_data": "Hisobot uchun ma'lumot topilmadi"
+  },
+  "validation": {
+    "required": "{field} talab qilinadi",
+    "min_length": "{field} kamida {min} ta belgidan iborat bo'lishi kerak",
+    "max_length": "{field} {max} ta belgidan oshmasligi kerak",
+    "invalid_format": "{field} formati noto'g'ri",
+    "invalid_phone": "Telefon raqam formati noto'g'ri",
+    "invalid_email": "Email formati noto'g'ri"
+  },
+  "error": {
+    "internal": "Serverda xatolik yuz berdi",
+    "not_found": "{resource} topilmadi",
+    "conflict": "Resurs allaqachon mavjud",
+    "too_many_requests": "Ko'p so'rov yuborildi. Iltimos, keyinroq urinib ko'ring",
+    "maintenance": "Tizim texnik xizmat ko'rsatish rejimida. Birozdan so'ng urinib ko'ring"
+  },
+  "common": {
+    "success": "Muvaffaqiyatli",
+    "error": "Xatolik",
+    "warning": "Ogohlantirish",
+    "info": "Ma'lumot",
+    "yes": "Ha",
+    "no": "Yo'q",
+    "cancel": "Bekor qilish",
+    "confirm": "Tasdiqlash",
+    "save": "Saqlash",
+    "delete": "O'chirish",
+    "edit": "Tahrirlash",
+    "create": "Yaratish",
+    "search": "Qidirish",
+    "filter": "Filtrlash",
+    "loading": "Yuklanmoqda",
+    "no_data": "Ma'lumot yo'q",
+    "retry": "Qayta urinish",
+    "back": "Orqaga",
+    "next": "Keyingi",
+    "submit": "Yuborish"
+  },
+  "notification": {
+    "meeting_reminder": "Uchrashuv eslatmasi",
+    "meeting_invite": "Uchrashuvga taklif",
+    "attendance_reminder": "Davomat eslatmasi",
+    "report_ready": "Hisobot tayyor"
+  }
+}

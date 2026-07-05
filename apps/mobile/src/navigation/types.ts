@@ -1,0 +1,41 @@
+export type RootStackParamList = {
+  Login: undefined;
+  OtpVerification: { phone: string };
+  MainTabs: undefined;
+  CheckIn: undefined;
+  CheckOut: undefined;
+  MeetingDetail: { meetingId: string };
+  AttendanceHistory: undefined;
+  Statistics: undefined;
+  Profile: undefined;
+  Notifications: undefined;
+  DepartmentAttendance: undefined;
+  CreateMeeting: undefined;
+  DepartmentReports: undefined;
+  OrganizationsManagement: undefined;
+  EmployeesRegistry: undefined;
+  OrganizationSettings: undefined;
+  CreateGlobalMeeting: undefined;
+  SuspiciousActivities: undefined;
+  AuditLogs: undefined;
+  ReportsCenter: undefined;
+  MeetingMonitoringDashboard: undefined;
+  SystemSettings: undefined;
+  Settings: undefined;
+  TwoFactorSetup: undefined;
+  SessionManagement: undefined;
+  Conversations: undefined;
+  ChatMessages: { employeeId: string; fullName: string };
+  Documents: undefined;
+  FaceVerification: undefined;
+  QRScanner: undefined;
+  EmployeeDirectory: undefined;
+  CreateOrder: undefined;
+};
+
+export type MainTabParamList = {
+  Home: undefined;
+  Meetings: undefined;
+  Notifications: undefined;
+  Profile: undefined;
+};
