@@ -4,7 +4,9 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
 const HOST = Platform.OS === "android" ? "10.0.2.2" : "localhost";
-const API_URL = process.env.EXPO_PUBLIC_API_URL || `http://${HOST}:4000/api/v1`;
+const API_URL = __DEV__
+  ? `http://${HOST}:4000/api/v1`
+  : "https://backend-production-d163.up.railway.app/api/v1";
 
 const TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";

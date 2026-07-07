@@ -19,7 +19,7 @@ class WebSocketService {
     const host = Platform.OS === "android" ? "10.0.2.2" : "localhost";
     const baseUrl = __DEV__
       ? `ws://${host}:4000/ws`
-      : "wss://uychi-majlis.uz/ws";
+      : "wss://backend-production-d163.up.railway.app/ws";
 
     this.url = `${baseUrl}?token=${token}`;
     this.isConnecting = true;
