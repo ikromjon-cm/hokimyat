@@ -38,11 +38,13 @@ COPY --from=builder /app/apps/backend/dist ./dist
 COPY --from=builder /app/apps/backend/prisma ./prisma
 COPY --from=builder /app/apps/backend/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
-RUN mkdir -p uploads/selfies && chown express:nodejs uploads/selfies
+RUN mkdir -p uploads/selfies && chown express:nodejs uploads/selfies \
+    && chmod +x docker-entrypoint.sh
 
 USER express
 
 EXPOSE 4000
 
-CMD ["node", "dist/index.js"]
+CMD ["./docker-entrypoint.sh"]

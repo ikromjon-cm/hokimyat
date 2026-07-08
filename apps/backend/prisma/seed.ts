@@ -170,7 +170,9 @@ async function main() {
   startDate.setDate(startDate.getDate() - 30);
   startDate.setHours(9, 0, 0, 0);
 
-  for (let day = 0; day < 20; day++) {
+  // Only generate demo attendance once (idempotent: safe to re-run seed on every boot).
+  const existingAttendance = await prisma.attendance.count();
+  for (let day = 0; existingAttendance === 0 && day < 20; day++) {
     const checkInTime = new Date(startDate);
     checkInTime.setDate(checkInTime.getDate() + day);
     if (checkInTime.getDay() === 0 || checkInTime.getDay() === 6) continue;

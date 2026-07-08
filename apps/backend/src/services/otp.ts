@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { prisma } from "./prisma";
 import { sendSMS } from "./sms";
+import { config } from "../config";
 import { AppError } from "../middleware/errorHandler";
 
 const OTP_LENGTH = 6;
@@ -21,7 +22,13 @@ function hashOTP(otp: string): string {
   return crypto.createHash("sha256").update(otp).digest("hex");
 }
 
-export async function requestOTP(phone: string): Promise<void> {
+export interface RequestOtpResult {
+  // In demo mode the generated code is returned so the client can display it
+  // (no SMS is sent). In SMS mode this is undefined.
+  devCode?: string;
+}
+
+export async function requestOTP(phone: string): Promise<RequestOtpResult> {
   const normalizedPhone = phone.replace(/[^0-9]/g, "");
   if (normalizedPhone.length < 10) {
     throw new AppError("Telefon raqam formati noto'g'ri", 400, "INVALID_PHONE");
@@ -63,11 +70,19 @@ export async function requestOTP(phone: string): Promise<void> {
     },
   });
 
+  // Demo/free mode: skip SMS entirely and return the code to the caller.
+  if (config.otp.demoMode) {
+    console.log(`[OTP] Demo rejim: ${normalizedPhone} uchun kod = ${otp}`);
+    return { devCode: otp };
+  }
+
   try {
     await sendSMS(normalizedPhone, `UYCHI MAJLIS: Sizning tasdiqlash kodingiz: ${otp}. Kod ${OTP_EXPIRY_MINUTES} daqiqa amal qiladi.`);
   } catch (error) {
     console.error("[OTP] SMS yuborishda xatolik:", error);
   }
+
+  return {};
 }
 
 export async function verifyOTP(phone: string, code: string): Promise<boolean> {

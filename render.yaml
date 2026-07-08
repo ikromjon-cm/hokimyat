@@ -1,0 +1,44 @@
+# UYCHI MAJLIS — Render Blueprint (100% free tier)
+# Deploy: Render Dashboard → New → Blueprint → connect this repo.
+# DATABASE_URL (Neon) and REDIS_URL (Upstash) are set manually in the dashboard.
+services:
+  - type: web
+    name: uychi-majlis-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    region: frankfurt
+    branch: main
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_PREFIX
+        value: /api/v1
+      # Single instance on 512MB free tier — do not fork cluster workers.
+      - key: CLUSTER_ENABLED
+        value: "false"
+      # Background BullMQ workers off to stay within Upstash free command quota.
+      - key: JOBS_ENABLED
+        value: "false"
+      # Free demo login: OTP code is returned in the API response (no paid SMS).
+      - key: OTP_DEMO_MODE
+        value: "true"
+      - key: CORS_ORIGIN
+        value: "*"
+      # Auto-generated strong secrets (never stored in git).
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: SELFIE_ENCRYPTION_KEY
+        generateValue: true
+      # Set these two manually in the Render dashboard after creating the DBs:
+      #   DATABASE_URL  -> Neon Postgres connection string (with ?sslmode=require)
+      #   REDIS_URL     -> Upstash Redis connection string (rediss://...)
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false

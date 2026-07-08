@@ -18,10 +18,10 @@
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.uychimajlis.uz/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://backend-production-d163.up.railway.app/api/v1"
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       },
       "ios": {
         "autoIncrement": true
@@ -39,11 +39,6 @@
         "ascAppId": "your-apple-app-store-id",
         "appleTeamId": "your-apple-team-id"
       }
-    }
-  },
-  "update": {
-    "production": {
-      "channel": "production"
     }
   }
 }

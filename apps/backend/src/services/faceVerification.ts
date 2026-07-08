@@ -97,12 +97,14 @@ export async function getReferencePhoto(employeeId: string): Promise<Buffer | nu
 }
 
 function getEncryptionKey(): Buffer {
-  const keyHex = process.env.SELFIE_ENCRYPTION_KEY || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-  const key = Buffer.from(keyHex, "hex");
-  if (key.length !== 32) {
-    throw new Error(`SELFIE_ENCRYPTION_KEY must be 64 hex chars (32 bytes) for AES-256-GCM, got ${keyHex.length} chars`);
+  const raw = process.env.SELFIE_ENCRYPTION_KEY || "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+  // Backward compatible: a 64-char hex string is used directly as the 32-byte key.
+  if (/^[0-9a-fA-F]{64}$/.test(raw)) {
+    return Buffer.from(raw, "hex");
   }
-  return key;
+  // Otherwise derive a stable 32-byte key from any secret via SHA-256,
+  // so auto-generated secrets of any length/charset work out of the box.
+  return crypto.createHash("sha256").update(raw).digest();
 }
 
 function encryptPhoto(buffer: Buffer): Buffer {

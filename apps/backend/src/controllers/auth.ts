@@ -29,7 +29,7 @@ const refreshSchema = z.object({
 export async function requestOtpHandler(req: Request, res: Response, next: NextFunction) {
   try {
     const { phone } = requestOtpSchema.parse(req.body);
-    await requestOTP(phone);
+    const result = await requestOTP(phone);
 
     await createAuditLog({
       action: AuditAction.OTP_REQUESTED,
@@ -38,6 +38,16 @@ export async function requestOtpHandler(req: Request, res: Response, next: NextF
       ipAddress: req.ip,
       userAgent: req.get("user-agent"),
     });
+
+    if (result.devCode) {
+      // Demo/free mode: no SMS sent, code returned directly for the client to show.
+      res.json({
+        message: "Demo rejim: tasdiqlash kodi to'g'ridan-to'g'ri qaytarildi",
+        demoMode: true,
+        devCode: result.devCode,
+      });
+      return;
+    }
 
     res.json({ message: "Tasdiqlash kodi SMS orqali yuborildi" });
   } catch (error) {

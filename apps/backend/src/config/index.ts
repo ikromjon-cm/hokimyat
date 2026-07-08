@@ -24,6 +24,24 @@ export const config = {
     apiUrl: process.env.ESKIZ_API_URL || "https://notify.eskiz.uz/api/v1",
   },
 
+  otp: {
+    // Demo/free mode: when enabled, the OTP code is returned in the API response
+    // instead of being sent via SMS (no paid SMS provider required).
+    // Defaults ON when no Eskiz SMS credentials are configured.
+    demoMode:
+      process.env.OTP_DEMO_MODE === "true" ||
+      (process.env.OTP_DEMO_MODE !== "false" &&
+        !process.env.ESKIZ_EMAIL &&
+        !process.env.ESKIZ_PASSWORD),
+  },
+
+  jobs: {
+    // Background BullMQ workers (reminders, daily reports). Disabled by default
+    // to keep free-tier Redis (Upstash) command usage low. Set JOBS_ENABLED=true
+    // on a paid Redis to enable scheduled reminders.
+    enabled: process.env.JOBS_ENABLED === "true",
+  },
+
   expo: {
     accessToken: process.env.EXPO_ACCESS_TOKEN || "",
   },

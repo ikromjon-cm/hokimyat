@@ -120,12 +120,14 @@ app.get("/health", async (_req, res) => {
     checks.database = true;
   } catch {}
   try {
-    await redisClient.ping();
-    checks.redis = true;
+    const pong = await redisClient.ping();
+    checks.redis = pong === "PONG" || pong === "NO_REDIS";
   } catch {}
-  const allOk = checks.database && checks.redis;
+  // Liveness is gated on the database only; Redis is non-critical and reported
+  // separately so a transient Redis blip does not fail the platform health check.
+  const allOk = checks.database;
   res.status(allOk ? 200 : 503).json({
-    status: allOk ? "ok" : "degraded",
+    status: allOk && checks.redis ? "ok" : "degraded",
     timestamp: new Date().toISOString(),
     service: "uychi-majlis-backend",
     checks,
@@ -186,7 +188,15 @@ function gracefulShutdown() {
 async function startServer() {
   try {
     await initializeRedis();
-    await initializeQueueProcessors();
+
+    // Background BullMQ workers are optional. Disabled by default to keep
+    // free-tier Redis (Upstash) command usage low. Enable with JOBS_ENABLED=true.
+    if (process.env.JOBS_ENABLED === "true") {
+      await initializeQueueProcessors();
+      console.log("[UYCHI MAJLIS] Background jobs enabled");
+    } else {
+      console.log("[UYCHI MAJLIS] Background jobs disabled (JOBS_ENABLED != true)");
+    }
 
     const server = http.createServer(app);
     initializeWebSocket(server);
