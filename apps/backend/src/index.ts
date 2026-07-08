@@ -113,14 +113,20 @@ app.get("/api-docs.json", (_req, res) => {
   res.send(swaggerSpec);
 });
 
+const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T> =>
+  Promise.race([
+    p,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+
 app.get("/health", async (_req, res) => {
   const checks = { database: false, redis: false };
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await withTimeout(prisma.$queryRaw`SELECT 1`, 3000);
     checks.database = true;
   } catch {}
   try {
-    const pong = await redisClient.ping();
+    const pong = await withTimeout(redisClient.ping(), 2000);
     checks.redis = pong === "PONG" || pong === "NO_REDIS";
   } catch {}
   // Liveness is gated on the database only; Redis is non-critical and reported
