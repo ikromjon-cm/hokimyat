@@ -8,7 +8,7 @@ const HOST = Platform.OS === "android" ? "10.0.2.2" : "localhost";
 // Falls back to the local dev server when running in development.
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
-  (__DEV__ ? `http://${HOST}:4000/api/v1` : "https://backend-production-d163.up.railway.app/api/v1");
+  (__DEV__ ? `http://${HOST}:4000/api/v1` : "https://uychi-majlis-backend.onrender.com/api/v1");
 
 const TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
@@ -24,7 +24,8 @@ class ApiService {
   constructor() {
     this.client = axios.create({
       baseURL: API_URL,
-      timeout: 30000,
+      // 60s so a first request can survive a free-tier cold start (~50s wake-up).
+      timeout: 60000,
       headers: {
         "Content-Type": "application/json",
       },

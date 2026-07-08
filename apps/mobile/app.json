@@ -85,7 +85,7 @@
       "expo-router"
     ],
     "extra": {
-      "apiUrl": "http://localhost:4000/api/v1",
+      "apiUrl": "https://uychi-majlis-backend.onrender.com/api/v1",
       "eas": {
         "projectId": "6ff15ec2-b164-41aa-8b97-76cf42f83b7f"
       },
