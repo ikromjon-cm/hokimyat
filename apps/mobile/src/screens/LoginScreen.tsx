@@ -29,7 +29,7 @@ export default function LoginScreen() {
 
     const result = await requestOtp(phone);
     if (result.success) {
-      navigation.navigate("OtpVerification", { phone });
+      navigation.navigate("OtpVerification", { phone, devCode: result.devCode });
     } else {
       Alert.alert("Xatolik", result.message || "Xatolik yuz berdi");
     }

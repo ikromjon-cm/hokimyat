@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  View, Text, TextInput, StyleSheet, Alert, Platform,
+  View, Text, TextInput, StyleSheet, Alert,
 } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -14,10 +14,11 @@ type RouteType = RouteProp<RootStackParamList, "OtpVerification">;
 export default function OtpVerificationScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteType>();
-  const { phone } = route.params;
+  const { phone, devCode: initialDevCode } = route.params;
   const { verifyOtp, requestOtp, isLoading } = useAuth();
 
   const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [demoCode, setDemoCode] = useState<string | undefined>(initialDevCode);
   const [timer, setTimer] = useState(300);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
@@ -27,6 +28,13 @@ export default function OtpVerificationScreen() {
       return () => clearInterval(interval);
     }
   }, [timer]);
+
+  // Demo mode: auto-fill the code returned by the backend so login is one tap.
+  useEffect(() => {
+    if (demoCode && /^\d{6}$/.test(demoCode)) {
+      setCode(demoCode.split(""));
+    }
+  }, [demoCode]);
 
   const handleCodeChange = (text: string, index: number) => {
     const newCode = [...code];
@@ -60,8 +68,14 @@ export default function OtpVerificationScreen() {
     if (result.success) {
       setTimer(300);
       setCode(["", "", "", "", "", ""]);
-      inputRefs.current[0]?.focus();
-      Alert.alert("Yuborildi", "Yangi kod SMS orqali yuborildi");
+      if (result.devCode) {
+        setDemoCode(result.devCode);
+        Alert.alert("Yangi kod", "Demo rejim: yangi kod avtomatik to'ldirildi");
+      } else {
+        setDemoCode(undefined);
+        inputRefs.current[0]?.focus();
+        Alert.alert("Yuborildi", "Yangi kod SMS orqali yuborildi");
+      }
     } else {
       Alert.alert("Xatolik", "Kodni qayta yuborib bo'lmadi");
     }
@@ -74,8 +88,18 @@ export default function OtpVerificationScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Tasdiqlash kodi</Text>
       <Text style={styles.subtitle}>
-        {phone} raqamiga SMS orqali kod yuborildi
+        {demoCode
+          ? "Demo rejim — kod avtomatik to'ldirildi"
+          : `${phone} raqamiga SMS orqali kod yuborildi`}
       </Text>
+
+      {demoCode ? (
+        <View style={styles.demoBanner}>
+          <Text style={styles.demoLabel}>DEMO KOD</Text>
+          <Text style={styles.demoCode}>{demoCode}</Text>
+          <Text style={styles.demoHint}>SMS yuborilmaydi — «Tasdiqlash»ni bosing</Text>
+        </View>
+      ) : null}
 
       <View style={styles.codeContainer}>
         {code.map((digit, index) => (
@@ -117,7 +141,20 @@ export default function OtpVerificationScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#1a1a2e", justifyContent: "center", padding: 24 },
   title: { fontSize: 24, fontWeight: "bold", color: "#fff", textAlign: "center", marginBottom: 8 },
-  subtitle: { fontSize: 14, color: "#8899aa", textAlign: "center", marginBottom: 32 },
+  subtitle: { fontSize: 14, color: "#8899aa", textAlign: "center", marginBottom: 24 },
+  demoBanner: {
+    backgroundColor: "#0f3460",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e94560",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  demoLabel: { fontSize: 11, color: "#e94560", fontWeight: "700", letterSpacing: 2 },
+  demoCode: { fontSize: 32, color: "#fff", fontWeight: "bold", letterSpacing: 8, marginTop: 4 },
+  demoHint: { fontSize: 12, color: "#8899aa", marginTop: 4 },
   codeContainer: { flexDirection: "row", justifyContent: "space-between", marginBottom: 32 },
   codeInput: {
     width: 48, height: 56, backgroundColor: "#0f3460", borderRadius: 12,

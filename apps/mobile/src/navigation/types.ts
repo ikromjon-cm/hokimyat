@@ -1,6 +1,6 @@
 export type RootStackParamList = {
   Login: undefined;
-  OtpVerification: { phone: string };
+  OtpVerification: { phone: string; devCode?: string };
   MainTabs: undefined;
   CheckIn: undefined;
   CheckOut: undefined;

@@ -6,6 +6,7 @@ import { getErrorMessage } from "../utils/errorHandler";
 interface LoginResult {
   success: boolean;
   message?: string;
+  devCode?: string;
 }
 
 export function useAuth() {
@@ -15,8 +16,9 @@ export function useAuth() {
   const requestOtp = useCallback(async (phone: string): Promise<LoginResult> => {
     setAuthLoading(true);
     try {
-      await api.post("/auth/request-otp", { phone });
-      return { success: true };
+      const res = await api.post("/auth/request-otp", { phone });
+      // In demo mode the backend returns the OTP code directly (no SMS sent).
+      return { success: true, devCode: res.data?.devCode };
     } catch (error) {
       return { success: false, message: getErrorMessage(error) };
     } finally {
