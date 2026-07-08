@@ -70,7 +70,7 @@ export default function OtpVerificationScreen() {
       setCode(["", "", "", "", "", ""]);
       if (result.devCode) {
         setDemoCode(result.devCode);
-        Alert.alert("Yangi kod", "Demo rejim: yangi kod avtomatik to'ldirildi");
+        Alert.alert("Yangi kod", "Yangi tasdiqlash kodi avtomatik to'ldirildi");
       } else {
         setDemoCode(undefined);
         inputRefs.current[0]?.focus();
@@ -89,15 +89,15 @@ export default function OtpVerificationScreen() {
       <Text style={styles.title}>Tasdiqlash kodi</Text>
       <Text style={styles.subtitle}>
         {demoCode
-          ? "Demo rejim — kod avtomatik to'ldirildi"
+          ? "Tasdiqlash kodi avtomatik to'ldirildi"
           : `${phone} raqamiga SMS orqali kod yuborildi`}
       </Text>
 
       {demoCode ? (
         <View style={styles.demoBanner}>
-          <Text style={styles.demoLabel}>DEMO KOD</Text>
+          <Text style={styles.demoLabel}>TASDIQLASH KODI</Text>
           <Text style={styles.demoCode}>{demoCode}</Text>
-          <Text style={styles.demoHint}>SMS yuborilmaydi — «Tasdiqlash»ni bosing</Text>
+          <Text style={styles.demoHint}>«Tasdiqlash» tugmasini bosing</Text>
         </View>
       ) : null}
 
