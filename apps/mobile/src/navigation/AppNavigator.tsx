@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorBoundary from "../components/ErrorBoundary";
 import NetworkBanner from "../components/NetworkBanner";
@@ -49,27 +49,33 @@ import OrganizationSettingsScreen from "../screens/admin/OrganizationSettingsScr
 import MeetingMonitoringDashboardScreen from "../screens/admin/MeetingMonitoringDashboardScreen";
 import CreateGlobalMeetingScreen from "../screens/admin/CreateGlobalMeetingScreen";
 
+const tabIcon = (emoji: string) =>
+  function TabIcon({ focused }: { focused: boolean }) {
+    return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>;
+  };
+
 function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#1a73e8",
-        tabBarInactiveTintColor: "#666",
+        tabBarActiveTintColor: "#4d8bf0",
+        tabBarInactiveTintColor: "#7a8499",
+        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
         tabBarStyle: {
-          backgroundColor: "#1a1a2e",
+          backgroundColor: "#16213e",
           borderTopWidth: 1,
           borderTopColor: "#0f3460",
           paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          paddingTop: 6,
+          height: 62,
         },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: "Bosh sahifa" }} />
-      <Tab.Screen name="Meetings" component={MeetingsScreen} options={{ tabBarLabel: "Uchrashuvlar" }} />
-      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ tabBarLabel: "Bildirishnomalar" }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: "Profil" }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: "Bosh sahifa", tabBarIcon: tabIcon("🏠") }} />
+      <Tab.Screen name="Meetings" component={MeetingsScreen} options={{ tabBarLabel: "Uchrashuvlar", tabBarIcon: tabIcon("📅") }} />
+      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ tabBarLabel: "Bildirishnoma", tabBarIcon: tabIcon("🔔") }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: "Profil", tabBarIcon: tabIcon("👤") }} />
     </Tab.Navigator>
   );
 }
