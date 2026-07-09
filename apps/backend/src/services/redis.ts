@@ -7,10 +7,12 @@ export async function initializeRedis(): Promise<void> {
   redis = new Redis(config.redis.url, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    // Fail commands after 5s instead of hanging forever when Redis is
-    // unreachable — otherwise request handlers (and /health) block indefinitely.
+    // Do NOT queue commands while disconnected — fail immediately instead of
+    // waiting. Combined with activeRedis() below, this means a down Redis never
+    // adds latency to the request path (app just skips the cache).
+    enableOfflineQueue: false,
     connectTimeout: 10000,
-    commandTimeout: 5000,
+    commandTimeout: 3000,
     retryStrategy(times) {
       if (times > 10) return null;
       return Math.min(times * 100, 3000);
@@ -30,6 +32,13 @@ export function getRedis(): Redis | null {
   return redis;
 }
 
+// Returns the client only when it is actually connected and ready. When Redis
+// is unreachable this returns null, so callers skip Redis instantly instead of
+// waiting for a command timeout on every request.
+function activeRedis(): Redis | null {
+  return redis && redis.status === "ready" ? redis : null;
+}
+
 // Every method swallows Redis errors and returns a safe default so that a
 // slow/unreachable Redis degrades features gracefully instead of hanging or
 // throwing across the request path (maintenance, cache, sessions, etc.).
@@ -43,18 +52,18 @@ async function safe<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
 }
 
 export const redisClient = {
-  get: async (key: string) => { const r = getRedis(); return r ? safe(() => r.get(key), null) : null; },
-  setex: async (key: string, ttl: number, value: string) => { const r = getRedis(); if (r) await safe(() => r.setex(key, ttl, value), "" as any); },
-  set: async (key: string, value: string, mode?: string, ttl?: number) => { const r = getRedis(); if (r) await safe(() => r.set(key, value, mode as any, ttl as any), "" as any); },
-  del: async (...keys: string[]) => { const r = getRedis(); if (r) await safe(() => r.del(...keys), 0); },
-  scan: async (cursor: string, opts: { match: string; count: number }): Promise<[string, string[]]> => { const r = getRedis(); if (!r) return ["0", []]; return safe(() => r.scan(cursor, "MATCH", opts.match, "COUNT", opts.count), ["0", []] as [string, string[]]); },
-  ping: async () => { const r = getRedis(); return r ? safe(() => r.ping(), "NO_REDIS") : "NO_REDIS"; },
-  quit: async () => { const r = getRedis(); if (r) await safe(() => r.quit(), "OK"); },
-  xlen: async (key: string) => { const r = getRedis(); return r ? safe(() => r.xlen(key), 0) : 0; },
+  get: async (key: string) => { const r = activeRedis(); return r ? safe(() => r.get(key), null) : null; },
+  setex: async (key: string, ttl: number, value: string) => { const r = activeRedis(); if (r) await safe(() => r.setex(key, ttl, value), "" as any); },
+  set: async (key: string, value: string, mode?: string, ttl?: number) => { const r = activeRedis(); if (r) await safe(() => r.set(key, value, mode as any, ttl as any), "" as any); },
+  del: async (...keys: string[]) => { const r = activeRedis(); if (r) await safe(() => r.del(...keys), 0); },
+  scan: async (cursor: string, opts: { match: string; count: number }): Promise<[string, string[]]> => { const r = activeRedis(); if (!r) return ["0", []]; return safe(() => r.scan(cursor, "MATCH", opts.match, "COUNT", opts.count), ["0", []] as [string, string[]]); },
+  ping: async () => { const r = activeRedis(); return r ? safe(() => r.ping(), "NO_REDIS") : "NO_REDIS"; },
+  quit: async () => { const r = activeRedis(); if (r) await safe(() => r.quit(), "OK"); },
+  xlen: async (key: string) => { const r = activeRedis(); return r ? safe(() => r.xlen(key), 0) : 0; },
 };
 
 export async function cacheSet(key: string, value: string, ttlSeconds: number = 3600): Promise<void> {
-  const r = getRedis();
+  const r = activeRedis();
   if (!r) return;
   try {
     await r.set(key, value, "EX", ttlSeconds);
@@ -64,7 +73,7 @@ export async function cacheSet(key: string, value: string, ttlSeconds: number = 
 }
 
 export async function cacheGet(key: string): Promise<string | null> {
-  const r = getRedis();
+  const r = activeRedis();
   if (!r) return null;
   try {
     return await r.get(key);
@@ -75,7 +84,7 @@ export async function cacheGet(key: string): Promise<string | null> {
 }
 
 export async function cacheDel(key: string): Promise<void> {
-  const r = getRedis();
+  const r = activeRedis();
   if (!r) return;
   try {
     await r.del(key);
