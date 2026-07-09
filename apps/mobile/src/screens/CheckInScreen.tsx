@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Location from "expo-location";
 import * as Network from "expo-network";
+import NetInfo from "@react-native-community/netinfo";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "../services/api";
 import { addToQueue } from "../services/offlineQueue";
@@ -106,7 +107,15 @@ export default function CheckInScreen() {
         return;
       }
 
-      setWifiSSID(null);
+      // TZ Layer 3: read the connected Wi-Fi SSID (best effort) so the server
+      // can match it against the office SSID and raise the confidence level.
+      try {
+        const net = await NetInfo.fetch();
+        const ssid = net.type === "wifi" ? (net.details as any)?.ssid : null;
+        setWifiSSID(ssid && ssid !== "<unknown ssid>" ? ssid : null);
+      } catch {
+        setWifiSSID(null);
+      }
 
       setStep("photo");
     } catch (error: any) {

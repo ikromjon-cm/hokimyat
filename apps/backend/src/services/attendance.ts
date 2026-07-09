@@ -113,6 +113,22 @@ export async function processCheckIn(data: CheckInData) {
         data: { type: "SUSPICIOUS_ACTIVITY", employeeId: data.employeeId },
       });
     }
+
+    // TZ: mock location => attendance is REJECTED (the attempt is logged above).
+    throw new AppError(
+      "Soxta lokatsiya aniqlandi. Davomat rad etildi va administrator xabardor qilindi.",
+      403,
+      "MOCK_LOCATION"
+    );
+  }
+
+  // TZ: outside the geofence => REJECTED with a clear distance message.
+  if (!isInside) {
+    throw new AppError(
+      `Siz ish joyidan ${Math.round(distance)} metr uzoqdasiz. Davomat faqat ish joyida belgilanadi.`,
+      403,
+      "OUTSIDE_GEOFENCE"
+    );
   }
 
   let selfiePath: string | null = null;

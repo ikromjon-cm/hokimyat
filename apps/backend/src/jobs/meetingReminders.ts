@@ -17,8 +17,9 @@ export async function sendMeetingReminders(): Promise<void> {
       },
     },
     include: {
+      // TZ: repeat reminders go only to participants who have NOT confirmed yet.
       participants: {
-        where: { status: { not: "DECLINED" } },
+        where: { status: "PENDING" },
         include: {
           employee: {
             include: { user: true },
@@ -63,7 +64,13 @@ export async function sendHighFrequencyReminders(): Promise<void> {
     },
     include: {
       participants: {
-        where: { status: { notIn: ["DECLINED", "CONFIRMED"] } },
+        include: {
+          employee: {
+            include: { user: true },
+          },
+        },
+      },
+      overseers: {
         include: {
           employee: {
             include: { user: true },
@@ -74,12 +81,16 @@ export async function sendHighFrequencyReminders(): Promise<void> {
   });
 
   for (const meeting of imminentMeetings) {
-    for (const participant of meeting.participants) {
-      const user = participant.employee.user;
-      const minutesUntilStart = Math.round(
-        (meeting.startTime.getTime() - now.getTime()) / 60000
-      );
+    const minutesUntilStart = Math.round(
+      (meeting.startTime.getTime() - now.getTime()) / 60000
+    );
+    const total = meeting.participants.length;
+    const confirmed = meeting.participants.filter((p) => p.status === "CONFIRMED").length;
 
+    // Urgent reminders to participants who still haven't confirmed (push + SMS).
+    const pending = meeting.participants.filter((p) => p.status === "PENDING");
+    for (const participant of pending) {
+      const user = participant.employee.user;
       const message = `Shoshilinch! "${meeting.title}" uchrashuviga ${minutesUntilStart} daqiqa qoldi. Iltimos, tasdiqlang!`;
 
       await sendPushNotification(user.id, {
@@ -87,6 +98,32 @@ export async function sendHighFrequencyReminders(): Promise<void> {
         body: message,
         data: { type: "MEETING_REMINDER", meetingId: meeting.id },
       });
+
+      try {
+        await sendSMS(user.phone, `UYCHI MAJLIS: ${message}`);
+      } catch (err) {
+        console.error(`[Reminder] SMS failed for ${user.phone}:`, err);
+      }
+    }
+
+    // TZ 3.2: ~30 min before start, notify overseers with the confirmation count.
+    if (minutesUntilStart >= 25 && minutesUntilStart <= 35) {
+      for (const overseer of meeting.overseers) {
+        const user = overseer.employee.user;
+        const message = `Eslatma: "${meeting.title}" majlisi ${minutesUntilStart} daqiqadan so'ng boshlanadi. Tasdiqlaganlar: ${confirmed}/${total}`;
+
+        await sendPushNotification(user.id, {
+          title: "Majlis eslatmasi (nazoratchi)",
+          body: message,
+          data: { type: "MEETING_REMINDER", meetingId: meeting.id },
+        });
+
+        try {
+          await sendSMS(user.phone, `UYCHI MAJLIS: ${message}`);
+        } catch (err) {
+          console.error(`[Reminder] Overseer SMS failed for ${user.phone}:`, err);
+        }
+      }
     }
   }
 }

@@ -125,6 +125,37 @@ export async function createMeeting(data: CreateMeetingData) {
     });
   }
 
+  // TZ 3.2: notify each overseer (nazoratchi). They are not participants but
+  // must be informed that a meeting was scheduled, with the participant count.
+  for (const overseer of meeting.overseers) {
+    const user = overseer.employee.user;
+    const overseerBody = `${meeting.participants.length} kishi ishtirokida majlis rejalashtirildi: "${data.title}", ${new Date(data.date).toLocaleDateString("uz-UZ")} ${new Date(data.startTime).toLocaleTimeString("uz-UZ")}`;
+
+    await prisma.notificationLog.create({
+      data: {
+        userId: user.id,
+        notificationId: notification.id,
+        type: notificationData.type,
+        channel: notificationData.channel,
+        title: "Majlis (nazoratchi)",
+        body: overseerBody,
+        data: notificationData.data as any,
+      },
+    });
+
+    try {
+      await sendSMS(user.phone, `UYCHI MAJLIS: ${overseerBody}`);
+    } catch (err) {
+      console.error(`[Meeting] Nazoratchiga SMS xatolik ${user.phone}:`, err);
+    }
+
+    await sendPushNotification(user.id, {
+      title: "Majlis rejalashtirildi (nazoratchi)",
+      body: overseerBody,
+      data: notificationData.data as any,
+    });
+  }
+
   await prisma.notification.update({
     where: { id: notification.id },
     data: { status: "SENT", sentAt: new Date() },
