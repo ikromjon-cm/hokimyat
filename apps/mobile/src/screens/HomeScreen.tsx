@@ -89,9 +89,9 @@ export default function HomeScreen() {
       </View>
 
       {!hasCheckedIn ? (
-        <ThemedButton title="Keldim" onPress={() => navigation.navigate("CheckIn")} variant="primary" size="lg" fullWidth style={styles.checkIn} />
+        <ThemedButton title="Keldim" onPress={() => navigation.navigate("CheckIn")} variant="primary" size="lg" style={styles.checkIn} />
       ) : !hasCheckedOut ? (
-        <ThemedButton title="Ketdim" onPress={() => navigation.navigate("CheckOut")} variant="secondary" size="lg" fullWidth style={styles.checkOut} />
+        <ThemedButton title="Ketdim" onPress={() => navigation.navigate("CheckOut")} variant="secondary" size="lg" style={styles.checkOut} />
       ) : (
         <ThemedCard style={styles.completedCard}>
           <Text style={styles.completedIcon}>✓</Text>
@@ -129,7 +129,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#1a1a2e" },
-  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingTop: 56, paddingBottom: 20 },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 56, paddingBottom: 20 },
   greeting: { fontSize: 14, color: "#8899aa" },
   userName: { fontSize: 26, fontWeight: "bold", color: "#fff", marginTop: 2 },
   orgName: { fontSize: 13, color: "#6b7a99", marginTop: 3 },
@@ -138,20 +138,20 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center", marginLeft: 12,
   },
   avatarText: { color: "#fff", fontSize: 22, fontWeight: "700" },
-  checkIn: { marginHorizontal: 20, marginBottom: 20, backgroundColor: "#2ecc71" },
-  checkOut: { marginHorizontal: 20, marginBottom: 20, backgroundColor: "#f39c12" },
-  completedCard: { marginHorizontal: 20, marginBottom: 20, alignItems: "center", padding: 22 },
+  checkIn: { alignSelf: "stretch", marginHorizontal: 16, marginBottom: 20, backgroundColor: "#2ecc71" },
+  checkOut: { alignSelf: "stretch", marginHorizontal: 16, marginBottom: 20, backgroundColor: "#f39c12" },
+  completedCard: { marginHorizontal: 16, marginBottom: 20, alignItems: "center", padding: 22 },
   completedIcon: { fontSize: 34, color: "#2ecc71", marginBottom: 6 },
   completedText: { color: "#2ecc71", fontSize: 15, fontWeight: "500" },
-  statsGrid: { flexDirection: "row", paddingHorizontal: 16, marginBottom: 26, gap: 8 },
+  statsGrid: { flexDirection: "row", paddingHorizontal: 16, marginBottom: 26, gap: 10 },
   statCard: { flex: 1, alignItems: "center", paddingVertical: 18, marginBottom: 0 },
   statValue: { fontSize: 24, fontWeight: "bold", color: "#fff" },
   statLabel: { fontSize: 11.5, color: "#8899aa", marginTop: 5, textAlign: "center" },
   sectionLabel: {
     fontSize: 12, fontWeight: "700", color: "#6b7a99", letterSpacing: 1,
-    textTransform: "uppercase", marginLeft: 20, marginBottom: 12, marginTop: 4,
+    textTransform: "uppercase", marginLeft: 16, marginBottom: 12, marginTop: 4,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 14, gap: 12, marginBottom: 14 },
+  grid: { flexDirection: "row", flexWrap: "wrap", paddingHorizontal: 16, gap: 12, marginBottom: 14 },
   gridCard: {
     width: "47%", flexGrow: 1, backgroundColor: "#16213e", borderRadius: 16,
     paddingVertical: 22, paddingHorizontal: 12, alignItems: "center",
