@@ -45,6 +45,14 @@ async function refreshToken(): Promise<string> {
 }
 
 export async function sendSMS(phone: string, message: string): Promise<void> {
+  // No SMS provider configured (demo/free mode): skip immediately instead of
+  // retrying 3x with backoff (~14s), which would make bulk meeting creation
+  // for many participants time out.
+  if (!config.eskiz.email || !config.eskiz.password) {
+    console.log(`[SMS] Not configured — skipped for ${phone}`);
+    return;
+  }
+
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
