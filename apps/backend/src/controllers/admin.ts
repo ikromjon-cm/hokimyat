@@ -1,11 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../services/prisma";
 import { createAuditLog } from "../middleware/audit";
+import { AppError } from "../middleware/errorHandler";
 import { AuditAction, Employee } from "@prisma/client";
 
 export async function createEmployeeHandler(req: Request, res: Response, next: NextFunction) {
   try {
-    const { phone, fullName, position, employeeCode, organizationId, departmentId, dateOfBirth, hireDate, address } = req.body;
+    const { phone, fullName, position, organizationId, departmentId, dateOfBirth, hireDate, address } = req.body;
+
+    if (!phone || !fullName || !organizationId || !departmentId) {
+      throw new AppError("Telefon, ism, tashkilot va bo'lim majburiy", 400, "MISSING_FIELDS");
+    }
+    // Employee code is required + unique; auto-generate a stable one if omitted.
+    const employeeCode = req.body.employeeCode || `EMP-${String(phone).replace(/\D/g, "").slice(-6)}`;
 
     const user = await prisma.user.create({
       data: {
