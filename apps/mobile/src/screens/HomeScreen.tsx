@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useQuery } from "@tanstack/react-query";
@@ -19,19 +20,19 @@ interface ActionItem {
 }
 
 const QUICK_ACTIONS: ActionItem[] = [
-  { label: "Davomat tarixi", screen: "AttendanceHistory", icon: "🕐" },
-  { label: "Statistika", screen: "Statistics", icon: "📊" },
-  { label: "Xabarlar", screen: "Conversations", icon: "💬" },
-  { label: "Hujjatlar", screen: "Documents", icon: "📄" },
-  { label: "Xodimlar", screen: "EmployeeDirectory", icon: "👥" },
+  { label: "Davomat tarixi", screen: "AttendanceHistory", icon: "history" },
+  { label: "Statistika", screen: "Statistics", icon: "chart-bar" },
+  { label: "Xabarlar", screen: "Conversations", icon: "comments" },
+  { label: "Hujjatlar", screen: "Documents", icon: "file-alt" },
+  { label: "Xodimlar", screen: "EmployeeDirectory", icon: "users" },
 ];
 
 const ADMIN_ACTIONS: ActionItem[] = [
-  { label: "Bo'lim davomati", screen: "DepartmentAttendance", icon: "🏢" },
-  { label: "Hisobotlar", screen: "DepartmentReports", icon: "📈" },
-  { label: "Xodimlar reestri", screen: "EmployeesRegistry", icon: "🗂️" },
-  { label: "Audit jurnali", screen: "AuditLogs", icon: "🛡️" },
-  { label: "Shubhali faoliyat", screen: "SuspiciousActivities", icon: "⚠️" },
+  { label: "Bo'lim davomati", screen: "DepartmentAttendance", icon: "user-check" },
+  { label: "Hisobotlar", screen: "DepartmentReports", icon: "chart-line" },
+  { label: "Xodimlar reestri", screen: "EmployeesRegistry", icon: "id-card" },
+  { label: "Audit jurnali", screen: "AuditLogs", icon: "shield-alt" },
+  { label: "Shubhali faoliyat", screen: "SuspiciousActivities", icon: "exclamation-triangle" },
 ];
 
 export default function HomeScreen() {
@@ -62,7 +63,7 @@ export default function HomeScreen() {
           activeOpacity={0.7}
           onPress={() => navigation.navigate(action.screen as any)}
         >
-          <Text style={styles.gridIcon}>{action.icon}</Text>
+          <FontAwesome5 name={action.icon} size={22} color="#4d8bf0" style={styles.gridIcon} />
           <Text style={styles.gridLabel}>{action.label}</Text>
         </TouchableOpacity>
       ))}
@@ -77,7 +78,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.greeting}>Assalomu alaykum 👋</Text>
+          <Text style={styles.greeting}>Assalomu alaykum</Text>
           <Text style={styles.userName} numberOfLines={1}>{user?.fullName || "Foydalanuvchi"}</Text>
           {user?.organization?.name ? (
             <Text style={styles.orgName} numberOfLines={1}>{user.organization.name}</Text>
@@ -157,6 +158,6 @@ const styles = StyleSheet.create({
     paddingVertical: 22, paddingHorizontal: 12, alignItems: "center",
     borderWidth: 1, borderColor: "#0f3460",
   },
-  gridIcon: { fontSize: 28, marginBottom: 10 },
+  gridIcon: { marginBottom: 12 },
   gridLabel: { color: "#e6ebf5", fontSize: 13.5, fontWeight: "600", textAlign: "center" },
 });

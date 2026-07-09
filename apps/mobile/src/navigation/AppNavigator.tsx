@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ErrorBoundary from "../components/ErrorBoundary";
 import NetworkBanner from "../components/NetworkBanner";
@@ -49,9 +50,9 @@ import OrganizationSettingsScreen from "../screens/admin/OrganizationSettingsScr
 import MeetingMonitoringDashboardScreen from "../screens/admin/MeetingMonitoringDashboardScreen";
 import CreateGlobalMeetingScreen from "../screens/admin/CreateGlobalMeetingScreen";
 
-const tabIcon = (emoji: string) =>
-  function TabIcon({ focused }: { focused: boolean }) {
-    return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.5 }}>{emoji}</Text>;
+const tabIcon = (name: string) =>
+  function TabIcon({ color }: { color: string }) {
+    return <FontAwesome5 name={name} size={19} color={color} />;
   };
 
 function MainTabs() {
@@ -72,10 +73,10 @@ function MainTabs() {
         },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: "Bosh sahifa", tabBarIcon: tabIcon("🏠") }} />
-      <Tab.Screen name="Meetings" component={MeetingsScreen} options={{ tabBarLabel: "Uchrashuvlar", tabBarIcon: tabIcon("📅") }} />
-      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ tabBarLabel: "Bildirishnoma", tabBarIcon: tabIcon("🔔") }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: "Profil", tabBarIcon: tabIcon("👤") }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: "Bosh sahifa", tabBarIcon: tabIcon("home") }} />
+      <Tab.Screen name="Meetings" component={MeetingsScreen} options={{ tabBarLabel: "Uchrashuvlar", tabBarIcon: tabIcon("calendar-alt") }} />
+      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ tabBarLabel: "Bildirishnoma", tabBarIcon: tabIcon("bell") }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: "Profil", tabBarIcon: tabIcon("user") }} />
     </Tab.Navigator>
   );
 }
