@@ -62,13 +62,14 @@ export default function EmployeesRegistryScreen() {
     if (!/^\+998\d{9}$/.test(form.phone)) return Alert.alert("Xatolik", "Telefon raqam +998XXXXXXXXX formatida bo'lishi kerak");
     if (!form.fullName.trim()) return Alert.alert("Xatolik", "To'liq ismni kiriting");
     if (!orgId) return Alert.alert("Xatolik", "Tashkilotni tanlang");
+    if (!deptId) return Alert.alert("Xatolik", "Bo'limni tanlang");
     createMutation.mutate({
       phone: form.phone,
       fullName: form.fullName.trim(),
       position: form.position.trim() || undefined,
       employeeCode: form.employeeCode.trim() || `EMP-${form.phone.slice(-4)}`,
       organizationId: orgId,
-      departmentId: deptId || undefined,
+      departmentId: deptId,
     });
   };
 
@@ -143,14 +144,14 @@ export default function EmployeesRegistryScreen() {
 
               {orgId ? (
                 <>
-                  <Text style={styles.label}>Bo'lim</Text>
+                  <Text style={styles.label}>Bo'lim *</Text>
                   <View style={styles.chips}>
                     {deptList.map((d) => (
                       <TouchableOpacity key={d.id} style={[styles.chip, deptId === d.id && styles.chipActive]} onPress={() => setDeptId(d.id)}>
                         <Text style={[styles.chipText, deptId === d.id && styles.chipTextActive]}>{d.name}</Text>
                       </TouchableOpacity>
                     ))}
-                    {deptList.length === 0 && <Text style={styles.hint}>Bo'lim yo'q (ixtiyoriy)</Text>}
+                    {deptList.length === 0 && <Text style={styles.hint}>Bu tashkilotda bo'lim yo'q — avval bo'lim qo'shing</Text>}
                   </View>
                 </>
               ) : null}

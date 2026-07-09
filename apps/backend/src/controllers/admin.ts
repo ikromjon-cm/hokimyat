@@ -11,8 +11,8 @@ export async function createEmployeeHandler(req: Request, res: Response, next: N
       data: {
         phone,
         fullName,
-        organizationId,
-        departmentId,
+        organization: organizationId ? { connect: { id: organizationId } } : undefined,
+        department: departmentId ? { connect: { id: departmentId } } : undefined,
         role: {
           connectOrCreate: {
             where: { name: "EMPLOYEE" },
@@ -23,8 +23,8 @@ export async function createEmployeeHandler(req: Request, res: Response, next: N
           create: {
             employeeCode,
             position,
-            organizationId,
-            departmentId,
+            organization: { connect: { id: organizationId } },
+            department: { connect: { id: departmentId } },
             dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
             hireDate: hireDate ? new Date(hireDate) : new Date(),
             address,
@@ -44,9 +44,8 @@ export async function createEmployeeHandler(req: Request, res: Response, next: N
     });
 
     res.status(201).json(user);
-  } catch (error: any) {
-    console.error("[createEmployee] error:", error);
-    res.status(500).json({ error: { message: error?.message, code: error?.code, meta: error?.meta, __debug: true } });
+  } catch (error) {
+    next(error);
   }
 }
 

@@ -35,8 +35,11 @@ export const exportLimiter = rateLimit({
 
 export const otpLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
-  message: { error: "Bir soatda 3 ta OTP dan ko'p yuborib bo'lmaydi." },
+  // Only FAILED requests count (skipSuccessfulRequests). Kept generous so a
+  // shared office IP (many employees behind one NAT) is not locked out by a few
+  // mistyped/unregistered attempts.
+  max: 20,
+  message: { error: "Juda ko'p urinish. Iltimos, birozdan so'ng urinib ko'ring." },
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
