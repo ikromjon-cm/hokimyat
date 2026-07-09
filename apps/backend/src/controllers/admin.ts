@@ -96,7 +96,24 @@ export async function getEmployeeByIdHandler(req: Request, res: Response, next: 
     const employee = await prisma.employee.findUnique({
       where: { id: req.params.id, deletedAt: null },
       include: {
-        user: { include: { role: true, devices: { where: { isActive: true } } } },
+        // Never expose refreshToken/totpSecret/backup codes via the admin view.
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            phone: true,
+            status: true,
+            avatarUrl: true,
+            totpEnabled: true,
+            lastLoginAt: true,
+            createdAt: true,
+            role: { select: { name: true, description: true } },
+            devices: {
+              where: { isActive: true },
+              select: { id: true, deviceName: true, platform: true, osVersion: true, lastUsedAt: true },
+            },
+          },
+        },
         organization: true,
         department: true,
       },

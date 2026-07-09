@@ -8,9 +8,31 @@ export async function getProfileHandler(req: Request, res: Response, next: NextF
 
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      include: {
+      // Explicit select — never expose refreshToken, totpSecret, backup codes,
+      // last-known IP/device, or the employee reference photo.
+      select: {
+        id: true,
+        phone: true,
+        fullName: true,
+        avatarUrl: true,
+        status: true,
+        totpEnabled: true,
+        languagePreference: true,
+        themePreference: true,
+        lastLoginAt: true,
+        createdAt: true,
         role: { select: { name: true, description: true } },
-        employee: true,
+        employee: {
+          select: {
+            id: true,
+            employeeCode: true,
+            position: true,
+            email: true,
+            isActive: true,
+            organizationId: true,
+            departmentId: true,
+          },
+        },
         organization: { select: { id: true, name: true, shortName: true } },
         department: { select: { id: true, name: true } },
       },
