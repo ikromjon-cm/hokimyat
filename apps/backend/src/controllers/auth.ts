@@ -29,6 +29,17 @@ const refreshSchema = z.object({
 export async function requestOtpHandler(req: Request, res: Response, next: NextFunction) {
   try {
     const { phone } = requestOtpSchema.parse(req.body);
+
+    // Only pre-registered, active users may log in — no self-registration.
+    // An admin must add the employee to the registry first.
+    const account = await prisma.user.findUnique({ where: { phone }, select: { status: true } });
+    if (!account) {
+      throw new AppError("Bu raqam tizimda ro'yxatdan o'tmagan. Administrator bilan bog'laning.", 403, "NOT_REGISTERED");
+    }
+    if (account.status !== "ACTIVE") {
+      throw new AppError("Hisobingiz faol emas. Administrator bilan bog'laning.", 403, "ACCOUNT_INACTIVE");
+    }
+
     const result = await requestOTP(phone);
 
     await createAuditLog({
@@ -61,7 +72,7 @@ export async function verifyOtpHandler(req: Request, res: Response, next: NextFu
 
     await verifyOTP(phone, code);
 
-    let user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { phone },
       include: {
         role: true,
@@ -71,28 +82,13 @@ export async function verifyOtpHandler(req: Request, res: Response, next: NextFu
       },
     });
 
+    // No self-registration: the account must already exist (added by an admin)
+    // and be active. This prevents anyone from logging in with any phone number.
     if (!user) {
-      user = await prisma.user.create({
-        data: {
-          phone,
-          role: {
-            connectOrCreate: {
-              where: { name: "EMPLOYEE" },
-              create: {
-                name: "EMPLOYEE",
-                description: "Xodim",
-                isSystem: true,
-              },
-            },
-          },
-        },
-        include: {
-          role: true,
-          employee: { select: { id: true } },
-          organization: { select: { id: true, name: true } },
-          department: { select: { id: true, name: true } },
-        },
-      });
+      throw new AppError("Bu raqam tizimda ro'yxatdan o'tmagan. Administrator bilan bog'laning.", 403, "NOT_REGISTERED");
+    }
+    if (user.status !== "ACTIVE") {
+      throw new UnauthorizedError("Hisobingiz faol emas. Administrator bilan bog'laning.");
     }
 
     if (deviceId) {
