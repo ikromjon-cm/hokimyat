@@ -6,17 +6,20 @@ import { validate } from "../middleware/validate";
 import { z } from "zod";
 import { checkInHandler, checkOutHandler, getTodayHandler, getHistoryHandler, getStatsHandler, getDepartmentAttendanceHandler } from "../controllers/attendance";
 
+// Check-in is submitted as multipart/form-data (for the selfie), so every field
+// arrives as a string. Coerce numbers and parse the boolean explicitly
+// (z.coerce.boolean() would treat the string "false" as true).
 const checkInSchema = z.object({
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
   wifiSSID: z.string().optional(),
-  mockLocation: z.boolean().default(false),
+  mockLocation: z.preprocess((v) => v === "true" || v === true, z.boolean()).default(false),
   deviceInfo: z.string().optional(),
 });
 
 const checkOutSchema = z.object({
-  latitude: z.number().min(-90).max(90).optional(),
-  longitude: z.number().min(-180).max(180).optional(),
+  latitude: z.coerce.number().min(-90).max(90).optional(),
+  longitude: z.coerce.number().min(-180).max(180).optional(),
   deviceInfo: z.string().optional(),
 });
 
