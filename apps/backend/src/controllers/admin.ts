@@ -44,8 +44,9 @@ export async function createEmployeeHandler(req: Request, res: Response, next: N
     });
 
     res.status(201).json(user);
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    console.error("[createEmployee] error:", error);
+    res.status(500).json({ error: { message: error?.message, code: error?.code, meta: error?.meta, __debug: true } });
   }
 }
 
