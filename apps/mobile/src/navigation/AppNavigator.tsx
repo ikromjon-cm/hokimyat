@@ -10,6 +10,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Notifications from "expo-notifications";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeProvider";
+import { useT } from "../utils/i18n";
 import { RootStackParamList, MainTabParamList } from "./types";
 import linking from "./linking";
 import { captureError } from "../services/sentry";
@@ -58,6 +59,7 @@ const tabIcon = (name: string) =>
 
 function MainTabs() {
   const { colors } = useTheme();
+  const tr = useT();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -75,10 +77,10 @@ function MainTabs() {
         },
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: "Bosh sahifa", tabBarIcon: tabIcon("home") }} />
-      <Tab.Screen name="Meetings" component={MeetingsScreen} options={{ tabBarLabel: "Uchrashuvlar", tabBarIcon: tabIcon("calendar-alt") }} />
-      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ tabBarLabel: "Bildirishnoma", tabBarIcon: tabIcon("bell") }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: "Profil", tabBarIcon: tabIcon("user") }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: tr("nav.home"), tabBarIcon: tabIcon("home") }} />
+      <Tab.Screen name="Meetings" component={MeetingsScreen} options={{ tabBarLabel: tr("nav.meetings"), tabBarIcon: tabIcon("calendar-alt") }} />
+      <Tab.Screen name="Notifications" component={NotificationsScreen} options={{ tabBarLabel: tr("nav.notifications"), tabBarIcon: tabIcon("bell") }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: tr("nav.profile"), tabBarIcon: tabIcon("user") }} />
     </Tab.Navigator>
   );
 }

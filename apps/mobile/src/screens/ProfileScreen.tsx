@@ -9,6 +9,7 @@ import { RootStackParamList } from "../navigation/types";
 import { useMutation } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
 import { api } from "../services/api";
+import { useT } from "../utils/i18n";
 import { useTheme, ThemeColors } from "../theme/ThemeProvider";
 import ThemedCard from "../components/ThemedCard";
 import ThemedButton from "../components/ThemedButton";
@@ -16,28 +17,29 @@ import ThemedButton from "../components/ThemedButton";
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const MENU = [
-  { label: "Davomat tarixi", screen: "AttendanceHistory", icon: "history" },
-  { label: "Statistika", screen: "Statistics", icon: "chart-bar" },
-  { label: "Bildirishnomalar", screen: "Notifications", icon: "bell" },
-  { label: "Xabarlar", screen: "Conversations", icon: "comments" },
-  { label: "Hujjatlar", screen: "Documents", icon: "file-alt" },
-  { label: "Yuz tekshirish", screen: "FaceVerification", icon: "user-shield" },
-  { label: "Sozlamalar", screen: "Settings", icon: "cog" },
+  { labelKey: "home.attendance_history", screen: "AttendanceHistory", icon: "history" },
+  { labelKey: "home.statistics", screen: "Statistics", icon: "chart-bar" },
+  { labelKey: "profile.notifications", screen: "Notifications", icon: "bell" },
+  { labelKey: "home.messages", screen: "Conversations", icon: "comments" },
+  { labelKey: "home.documents", screen: "Documents", icon: "file-alt" },
+  { labelKey: "profile.face", screen: "FaceVerification", icon: "user-shield" },
+  { labelKey: "profile.settings", screen: "Settings", icon: "cog" },
 ] as const;
 
 const ADMIN_MENU = [
-  { label: "Xodimlar reestri", screen: "EmployeesRegistry", icon: "id-card" },
-  { label: "Tashkilotlar", screen: "OrganizationsManagement", icon: "building" },
-  { label: "Hisobot markazi", screen: "ReportsCenter", icon: "chart-line" },
-  { label: "Tashkilot sozlamalari", screen: "OrganizationSettings", icon: "sliders-h" },
-  { label: "Audit jurnali", screen: "AuditLogs", icon: "shield-alt" },
-  { label: "Tizim sozlamalari", screen: "SystemSettings", icon: "server" },
+  { labelKey: "home.employees_registry", screen: "EmployeesRegistry", icon: "id-card" },
+  { labelKey: "profile.orgs", screen: "OrganizationsManagement", icon: "building" },
+  { labelKey: "profile.report_center", screen: "ReportsCenter", icon: "chart-line" },
+  { labelKey: "profile.org_settings", screen: "OrganizationSettings", icon: "sliders-h" },
+  { labelKey: "home.audit", screen: "AuditLogs", icon: "shield-alt" },
+  { labelKey: "profile.system_settings", screen: "SystemSettings", icon: "server" },
 ] as const;
 
 export default function ProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
+  const tr = useT();
   const { user, logout, updateUser } = useAuthStore();
   const [editVisible, setEditVisible] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName || "");
@@ -52,25 +54,25 @@ export default function ProfileScreen() {
     onSuccess: async (_data, name) => {
       await updateUser({ fullName: name });
       setEditVisible(false);
-      Alert.alert("Saqlandi", "Profil yangilandi");
+      Alert.alert(tr("common.success"), tr("profile.saved"));
     },
-    onError: (e: any) => Alert.alert("Xatolik", e?.response?.data?.error?.message || "Saqlanmadi"),
+    onError: (e: any) => Alert.alert(tr("common.error"), e?.response?.data?.error?.message || "?"),
   });
 
   const handleLogout = () => {
-    Alert.alert("Chiqish", "Tizimdan chiqishni xohlaysizmi?", [
-      { text: "Bekor qilish", style: "cancel" },
-      { text: "Chiqish", style: "destructive", onPress: () => logoutMutation.mutate() },
+    Alert.alert(tr("profile.logout"), tr("profile.logout_confirm"), [
+      { text: tr("common.cancel"), style: "cancel" },
+      { text: tr("profile.logout"), style: "destructive", onPress: () => logoutMutation.mutate() },
     ]);
   };
 
-  const roleLabel = user?.role === "SUPER_ADMIN" ? "Super Admin" : user?.role === "DEPARTMENT_HEAD" ? "Bo'lim boshlig'i" : "Xodim";
+  const roleLabel = user?.role === "SUPER_ADMIN" ? tr("profile.role_super") : user?.role === "DEPARTMENT_HEAD" ? tr("profile.role_head") : tr("profile.role_employee");
 
-  const renderMenu = (items: readonly { label: string; screen: string; icon: string }[]) =>
+  const renderMenu = (items: readonly { labelKey: string; screen: string; icon: string }[]) =>
     items.map((m) => (
       <TouchableOpacity key={m.screen} style={styles.menuItem} onPress={() => navigation.navigate(m.screen as any)} activeOpacity={0.7}>
         <FontAwesome5 name={m.icon} size={15} color={colors.primary} style={{ width: 26 }} />
-        <Text style={styles.menuText}>{m.label}</Text>
+        <Text style={styles.menuText}>{tr(m.labelKey)}</Text>
         <FontAwesome5 name="chevron-right" size={12} color={colors.textMuted} />
       </TouchableOpacity>
     ));
@@ -91,9 +93,9 @@ export default function ProfileScreen() {
 
       {user?.organization && (
         <ThemedCard>
-          <Text style={styles.infoLabel}>Tashkilot</Text>
+          <Text style={styles.infoLabel}>{tr("profile.organization")}</Text>
           <Text style={styles.infoValue}>{user.organization.name}</Text>
-          {user.department && (<><Text style={styles.infoLabel}>Bo'lim</Text><Text style={styles.infoValue}>{user.department.name}</Text></>)}
+          {user.department && (<><Text style={styles.infoLabel}>{tr("profile.department")}</Text><Text style={styles.infoValue}>{user.department.name}</Text></>)}
         </ThemedCard>
       )}
 
@@ -101,27 +103,27 @@ export default function ProfileScreen() {
         {renderMenu(MENU)}
         {user?.role === "SUPER_ADMIN" && (
           <>
-            <Text style={styles.menuHeader}>Administrator</Text>
+            <Text style={styles.menuHeader}>{tr("profile.admin")}</Text>
             {renderMenu(ADMIN_MENU)}
           </>
         )}
       </View>
 
-      <ThemedButton title="Chiqish" onPress={handleLogout} variant="danger" fullWidth style={{ marginHorizontal: 16, marginBottom: 16 }} loading={logoutMutation.isPending} />
+      <ThemedButton title={tr("profile.logout")} onPress={handleLogout} variant="danger" fullWidth style={{ marginHorizontal: 16, marginBottom: 16 }} loading={logoutMutation.isPending} />
       <Text style={styles.version}>UYCHI MAJLIS v1.0.0</Text>
 
       <Modal visible={editVisible} animationType="slide" transparent onRequestClose={() => setEditVisible(false)}>
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Profilni tahrirlash</Text>
-            <Text style={styles.infoLabel}>To'liq ism</Text>
+            <Text style={styles.modalTitle}>{tr("profile.edit_title")}</Text>
+            <Text style={styles.infoLabel}>{tr("profile.full_name")}</Text>
             <TextInput style={styles.input} value={fullName} onChangeText={setFullName} placeholder="Familiya Ism" placeholderTextColor={colors.textMuted} autoFocus />
-            <Text style={styles.infoLabel}>Telefon (o'zgartirib bo'lmaydi)</Text>
+            <Text style={styles.infoLabel}>{tr("profile.phone_readonly")}</Text>
             <Text style={[styles.input, styles.inputDisabled]}>{user?.phone}</Text>
             <View style={{ flexDirection: "row", gap: 10, marginTop: 16 }}>
-              <ThemedButton title="Bekor" onPress={() => setEditVisible(false)} variant="secondary" style={{ flex: 1 }} />
+              <ThemedButton title={tr("common.cancel")} onPress={() => setEditVisible(false)} variant="secondary" style={{ flex: 1 }} />
               <View style={{ flex: 1 }}>
-                <ThemedButton title="Saqlash" onPress={() => fullName.trim() ? saveMutation.mutate(fullName.trim()) : Alert.alert("Xatolik", "Ismni kiriting")} loading={saveMutation.isPending} fullWidth />
+                <ThemedButton title={tr("common.save")} onPress={() => fullName.trim() ? saveMutation.mutate(fullName.trim()) : Alert.alert(tr("common.error"), tr("profile.full_name"))} loading={saveMutation.isPending} fullWidth />
               </View>
             </View>
           </View>

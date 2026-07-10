@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { z } from "zod";
 import { RootStackParamList } from "../navigation/types";
 import { useAuth } from "../hooks/useAuth";
+import { useT } from "../utils/i18n";
 import { useTheme, ThemeColors } from "../theme/ThemeProvider";
 import ThemedButton from "../components/ThemedButton";
 import ThemedCard from "../components/ThemedCard";
@@ -17,6 +18,7 @@ export default function LoginScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
+  const tr = useT();
   const [phone, setPhone] = useState("+998");
   const { requestOtp, isLoading } = useAuth();
 
@@ -38,12 +40,12 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View style={styles.header}>
-        <Text style={styles.logo}>UYCHI MAJLIS</Text>
-        <Text style={styles.subtitle}>Hukumat ichki tizimi</Text>
+        <Text style={styles.logo}>{tr("app.name")}</Text>
+        <Text style={styles.subtitle}>{tr("app.subtitle")}</Text>
       </View>
 
       <ThemedCard>
-        <Text style={styles.label}>Telefon raqam</Text>
+        <Text style={styles.label}>{tr("auth.phone")}</Text>
         <TextInput
           style={styles.input}
           value={phone}
@@ -54,10 +56,10 @@ export default function LoginScreen() {
           autoFocus
           editable={!isLoading}
         />
-        <ThemedButton title="Kodni olish" onPress={handleRequestOtp} loading={isLoading} fullWidth />
+        <ThemedButton title={tr("auth.otp_request")} onPress={handleRequestOtp} loading={isLoading} fullWidth />
       </ThemedCard>
 
-      <Text style={styles.footer}>Tizimga kirish orqali siz foydalanish shartlariga rozilik bildirasiz</Text>
+      <Text style={styles.footer}>{tr("app.terms")}</Text>
     </KeyboardAvoidingView>
   );
 }

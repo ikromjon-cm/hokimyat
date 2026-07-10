@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { RootStackParamList } from "../navigation/types";
 import { useAuthStore } from "../store/authStore";
 import { api } from "../services/api";
+import { useT } from "../utils/i18n";
 import { useTheme, ThemeColors } from "../theme/ThemeProvider";
 import ThemedButton from "../components/ThemedButton";
 import ThemedCard from "../components/ThemedCard";
@@ -15,31 +16,32 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ScreenName = keyof RootStackParamList;
 
 interface ActionItem {
-  label: string;
+  labelKey: string;
   screen: ScreenName;
   icon: string;
 }
 
 const QUICK_ACTIONS: ActionItem[] = [
-  { label: "Davomat tarixi", screen: "AttendanceHistory", icon: "history" },
-  { label: "Statistika", screen: "Statistics", icon: "chart-bar" },
-  { label: "Xabarlar", screen: "Conversations", icon: "comments" },
-  { label: "Hujjatlar", screen: "Documents", icon: "file-alt" },
-  { label: "Xodimlar", screen: "EmployeeDirectory", icon: "users" },
+  { labelKey: "home.attendance_history", screen: "AttendanceHistory", icon: "history" },
+  { labelKey: "home.statistics", screen: "Statistics", icon: "chart-bar" },
+  { labelKey: "home.messages", screen: "Conversations", icon: "comments" },
+  { labelKey: "home.documents", screen: "Documents", icon: "file-alt" },
+  { labelKey: "home.employees", screen: "EmployeeDirectory", icon: "users" },
 ];
 
 const ADMIN_ACTIONS: ActionItem[] = [
-  { label: "Bo'lim davomati", screen: "DepartmentAttendance", icon: "user-check" },
-  { label: "Hisobotlar", screen: "DepartmentReports", icon: "chart-line" },
-  { label: "Xodimlar reestri", screen: "EmployeesRegistry", icon: "id-card" },
-  { label: "Audit jurnali", screen: "AuditLogs", icon: "shield-alt" },
-  { label: "Shubhali faoliyat", screen: "SuspiciousActivities", icon: "exclamation-triangle" },
+  { labelKey: "home.dept_attendance", screen: "DepartmentAttendance", icon: "user-check" },
+  { labelKey: "home.reports", screen: "DepartmentReports", icon: "chart-line" },
+  { labelKey: "home.employees_registry", screen: "EmployeesRegistry", icon: "id-card" },
+  { labelKey: "home.audit", screen: "AuditLogs", icon: "shield-alt" },
+  { labelKey: "home.suspicious", screen: "SuspiciousActivities", icon: "exclamation-triangle" },
 ];
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
+  const tr = useT();
   const user = useAuthStore((s) => s.user);
   const isAdmin = user?.role === "SUPER_ADMIN" || user?.role === "DEPARTMENT_HEAD";
   const initial = (user?.fullName || "F").trim().charAt(0).toUpperCase();
@@ -62,7 +64,7 @@ export default function HomeScreen() {
       {items.map((action) => (
         <TouchableOpacity key={action.screen} style={styles.gridCard} activeOpacity={0.7} onPress={() => navigation.navigate(action.screen as any)}>
           <FontAwesome5 name={action.icon} size={22} color={colors.primary} style={styles.gridIcon} />
-          <Text style={styles.gridLabel}>{action.label}</Text>
+          <Text style={styles.gridLabel}>{tr(action.labelKey)}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -72,36 +74,36 @@ export default function HomeScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 28, paddingHorizontal: 16 }} refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}>
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.greeting}>Assalomu alaykum</Text>
-          <Text style={styles.userName} numberOfLines={1}>{user?.fullName || "Foydalanuvchi"}</Text>
+          <Text style={styles.greeting}>{tr("home.greeting")}</Text>
+          <Text style={styles.userName} numberOfLines={1}>{user?.fullName || tr("home.user")}</Text>
           {user?.organization?.name ? <Text style={styles.orgName} numberOfLines={1}>{user.organization.name}</Text> : null}
         </View>
         <View style={styles.avatar}><Text style={styles.avatarText}>{initial}</Text></View>
       </View>
 
       {!hasCheckedIn ? (
-        <ThemedButton title="Keldim" onPress={() => navigation.navigate("CheckIn")} variant="primary" size="lg" style={styles.checkIn} />
+        <ThemedButton title={tr("home.check_in")} onPress={() => navigation.navigate("CheckIn")} variant="primary" size="lg" style={styles.checkIn} />
       ) : !hasCheckedOut ? (
-        <ThemedButton title="Ketdim" onPress={() => navigation.navigate("CheckOut")} variant="secondary" size="lg" style={styles.checkOut} />
+        <ThemedButton title={tr("home.check_out")} onPress={() => navigation.navigate("CheckOut")} variant="secondary" size="lg" style={styles.checkOut} />
       ) : (
         <View style={[styles.completedCard, { backgroundColor: colors.surface }]}>
           <Text style={styles.completedIcon}>✓</Text>
-          <Text style={styles.completedText}>Bugungi davomat to'liq qayd etildi</Text>
+          <Text style={styles.completedText}>{tr("home.completed")}</Text>
         </View>
       )}
 
       <View style={styles.statsGrid}>
-        <ThemedCard style={styles.statCard}><Text style={styles.statValue}>{stats?.presentDays ?? 0}</Text><Text style={styles.statLabel}>Kelgan kunlar</Text></ThemedCard>
-        <ThemedCard style={styles.statCard}><Text style={[styles.statValue, { color: colors.warning }]}>{stats?.lateDays ?? 0}</Text><Text style={styles.statLabel}>Kech qolish</Text></ThemedCard>
-        <ThemedCard style={styles.statCard}><Text style={[styles.statValue, { color: colors.success }]}>{stats?.attendanceRate ?? 0}%</Text><Text style={styles.statLabel}>Davomat foizi</Text></ThemedCard>
+        <ThemedCard style={styles.statCard}><Text style={styles.statValue}>{stats?.presentDays ?? 0}</Text><Text style={styles.statLabel}>{tr("home.present_days")}</Text></ThemedCard>
+        <ThemedCard style={styles.statCard}><Text style={[styles.statValue, { color: colors.warning }]}>{stats?.lateDays ?? 0}</Text><Text style={styles.statLabel}>{tr("home.late_days")}</Text></ThemedCard>
+        <ThemedCard style={styles.statCard}><Text style={[styles.statValue, { color: colors.success }]}>{stats?.attendanceRate ?? 0}%</Text><Text style={styles.statLabel}>{tr("home.rate")}</Text></ThemedCard>
       </View>
 
-      <Text style={styles.sectionLabel}>Tezkor havolalar</Text>
+      <Text style={styles.sectionLabel}>{tr("home.quick_links")}</Text>
       {renderGrid(QUICK_ACTIONS)}
 
       {isAdmin && (
         <>
-          <Text style={styles.sectionLabel}>Administrator paneli</Text>
+          <Text style={styles.sectionLabel}>{tr("home.admin_panel")}</Text>
           {renderGrid(ADMIN_ACTIONS)}
         </>
       )}

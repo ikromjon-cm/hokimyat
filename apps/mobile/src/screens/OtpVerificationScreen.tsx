@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
 import { useAuth } from "../hooks/useAuth";
+import { useT } from "../utils/i18n";
 import { useTheme, ThemeColors } from "../theme/ThemeProvider";
 import ThemedButton from "../components/ThemedButton";
 
@@ -15,6 +16,7 @@ export default function OtpVerificationScreen() {
   const route = useRoute<RouteType>();
   const { colors } = useTheme();
   const styles = makeStyles(colors);
+  const tr = useT();
   const { phone, devCode: initialDevCode } = route.params;
   const { verifyOtp, requestOtp, isLoading } = useAuth();
 
@@ -72,16 +74,16 @@ export default function OtpVerificationScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tasdiqlash kodi</Text>
+      <Text style={styles.title}>{tr("otp.title")}</Text>
       <Text style={styles.subtitle}>
-        {demoCode ? "Tasdiqlash kodi avtomatik to'ldirildi" : `${phone} raqamiga SMS orqali kod yuborildi`}
+        {demoCode ? tr("otp.autofilled") : `${phone} — ${tr("otp.sms_sent")}`}
       </Text>
 
       {demoCode ? (
         <View style={styles.demoBanner}>
-          <Text style={styles.demoLabel}>TASDIQLASH KODI</Text>
+          <Text style={styles.demoLabel}>{tr("otp.code_label")}</Text>
           <Text style={styles.demoCode}>{demoCode}</Text>
-          <Text style={styles.demoHint}>«Tasdiqlash» tugmasini bosing</Text>
+          <Text style={styles.demoHint}>{tr("otp.press_confirm")}</Text>
         </View>
       ) : null}
 
@@ -100,9 +102,9 @@ export default function OtpVerificationScreen() {
         ))}
       </View>
 
-      <ThemedButton title="Tasdiqlash" onPress={() => handleVerify()} loading={isLoading} disabled={code.join("").length !== 6} fullWidth />
+      <ThemedButton title={tr("otp.confirm")} onPress={() => handleVerify()} loading={isLoading} disabled={code.join("").length !== 6} fullWidth />
       <ThemedButton
-        title={timer > 0 ? `Kodni qayta yuborish (${minutes}:${seconds.toString().padStart(2, "0")})` : "Kodni qayta yuborish"}
+        title={timer > 0 ? `${tr("otp.resend")} (${minutes}:${seconds.toString().padStart(2, "0")})` : tr("otp.resend")}
         onPress={handleResend}
         disabled={timer > 0}
         variant="outline"
