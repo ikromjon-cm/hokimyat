@@ -1,5 +1,6 @@
 import React from "react";
 import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
+import { useTheme } from "../theme/ThemeProvider";
 
 interface LoadingSpinnerProps {
   message?: string;
@@ -13,40 +14,32 @@ export default function LoadingSpinner({
   message,
   fullScreen = false,
   size = "large",
-  color = "#1a73e8",
+  color,
   testID = "loading-spinner",
 }: LoadingSpinnerProps) {
+  const { colors } = useTheme();
+  const spinnerColor = color || colors.primary;
+  const message_ = message && <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>;
+
   if (fullScreen) {
     return (
-      <View style={styles.fullScreen} testID={testID}>
-        <ActivityIndicator size={size} color={color} />
-        {message && <Text style={styles.message}>{message}</Text>}
+      <View style={[styles.fullScreen, { backgroundColor: colors.bg }]} testID={testID}>
+        <ActivityIndicator size={size} color={spinnerColor} />
+        {message_}
       </View>
     );
   }
 
   return (
     <View style={styles.inline} testID={testID}>
-      <ActivityIndicator size={size} color={color} />
-      {message && <Text style={styles.message}>{message}</Text>}
+      <ActivityIndicator size={size} color={spinnerColor} />
+      {message_}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fullScreen: {
-    flex: 1,
-    backgroundColor: "#1a1a2e",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  inline: {
-    padding: 24,
-    alignItems: "center",
-  },
-  message: {
-    color: "#8899aa",
-    fontSize: 14,
-    marginTop: 12,
-  },
+  fullScreen: { flex: 1, justifyContent: "center", alignItems: "center" },
+  inline: { padding: 24, alignItems: "center" },
+  message: { fontSize: 14, marginTop: 12 },
 });
