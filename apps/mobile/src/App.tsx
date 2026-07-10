@@ -8,6 +8,7 @@ import { AppNavigator } from "./navigation/AppNavigator";
 import { useAuthStore } from "./store/authStore";
 import { useOrganizationStore } from "./store/organizationStore";
 import { NetworkProvider } from "./contexts/NetworkContext";
+import { ThemeProvider, useTheme } from "./theme/ThemeProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { processQueue } from "./services/offlineQueue";
 import { useNotifications } from "./hooks/useNotifications";
@@ -65,7 +66,13 @@ function AppInitializer() {
     }
   }, [isAuthenticated]);
 
-  return <AppNavigator />;
+  const { scheme } = useTheme();
+  return (
+    <>
+      <StatusBar style={scheme === "light" ? "dark" : "light"} />
+      <AppNavigator />
+    </>
+  );
 }
 
 function App() {
@@ -75,8 +82,9 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
             <NetworkProvider>
-              <StatusBar style="light" />
-              <AppInitializer />
+              <ThemeProvider>
+                <AppInitializer />
+              </ThemeProvider>
             </NetworkProvider>
           </SafeAreaProvider>
         </QueryClientProvider>

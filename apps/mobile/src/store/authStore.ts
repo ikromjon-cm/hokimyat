@@ -21,6 +21,7 @@ interface AuthState {
   setUser: (user: User | null) => Promise<void>;
   login: (accessToken: string, refreshToken: string, user: User) => Promise<void>;
   updatePreferences: (prefs: Partial<Pick<User, "languagePreference" | "themePreference">>) => Promise<void>;
+  updateUser: (patch: Partial<User>) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -43,6 +44,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const user = get().user;
     if (user) {
       const updated = { ...user, ...prefs };
+      set({ user: updated });
+      await SecureStore.setItemAsync("user_data", JSON.stringify(updated));
+    }
+  },
+
+  updateUser: async (patch) => {
+    const user = get().user;
+    if (user) {
+      const updated = { ...user, ...patch };
       set({ user: updated });
       await SecureStore.setItemAsync("user_data", JSON.stringify(updated));
     }

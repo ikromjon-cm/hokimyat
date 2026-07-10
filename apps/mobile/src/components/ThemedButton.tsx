@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, ViewStyle } from "react-native";
+import { useTheme } from "../theme/ThemeProvider";
 
 interface ThemedButtonProps {
   title: string;
@@ -13,14 +14,6 @@ interface ThemedButtonProps {
   testID?: string;
 }
 
-const COLORS: Record<string, { bg: string; text: string; border?: string }> = {
-  primary: { bg: "#1a73e8", text: "#fff" },
-  secondary: { bg: "#0f3460", text: "#fff" },
-  danger: { bg: "#e74c3c", text: "#fff" },
-  ghost: { bg: "transparent", text: "#8899aa" },
-  outline: { bg: "transparent", text: "#1a73e8", border: "#1a73e8" },
-};
-
 const SIZES = {
   sm: { paddingVertical: 8, paddingHorizontal: 16, fontSize: 13 },
   md: { paddingVertical: 14, paddingHorizontal: 24, fontSize: 15 },
@@ -31,7 +24,15 @@ export default function ThemedButton({
   title, onPress, variant = "primary", size = "md",
   loading = false, disabled = false, fullWidth = false, style, testID,
 }: ThemedButtonProps) {
-  const colors = COLORS[variant];
+  const { colors: t } = useTheme();
+  const PALETTE: Record<string, { bg: string; text: string; border?: string }> = {
+    primary: { bg: t.primary, text: t.onPrimary },
+    secondary: { bg: t.surfaceAlt, text: t.textPrimary },
+    danger: { bg: t.danger, text: "#fff" },
+    ghost: { bg: "transparent", text: t.textSecondary },
+    outline: { bg: "transparent", text: t.primary, border: t.primary },
+  };
+  const colors = PALETTE[variant];
   const sizes = SIZES[size];
 
   return (

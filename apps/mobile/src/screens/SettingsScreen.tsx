@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
 import { useAuthStore } from "../store/authStore";
 import { api } from "../services/api";
+import { useTheme, ThemeColors } from "../theme/ThemeProvider";
 import ThemedCard from "../components/ThemedCard";
 import Badge from "../components/Badge";
 
@@ -26,47 +27,33 @@ const THEMES: { code: Theme; label: string }[] = [
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const { user, updatePreferences } = useAuthStore();
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>(
-    (user?.languagePreference as Language) || "uz"
-  );
-  const [selectedTheme, setSelectedTheme] = useState<Theme>(
-    (user?.themePreference as Theme) || "system"
-  );
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>((user?.languagePreference as Language) || "uz");
+  const [selectedTheme, setSelectedTheme] = useState<Theme>((user?.themePreference as Theme) || "system");
   const [saving, setSaving] = useState(false);
 
-  const handleSaveLanguage = async (lang: Language) => {
+  const save = async (lang: Language, theme: Theme) => {
     setSaving(true);
     try {
-      await api.put("/users/preferences", { languagePreference: lang, themePreference: selectedTheme });
-      updatePreferences({ languagePreference: lang, themePreference: selectedTheme });
-      setSelectedLanguage(lang);
-    } catch {} finally { setSaving(false); }
+      await updatePreferences({ languagePreference: lang, themePreference: theme });
+      api.put("/users/preferences", { languagePreference: lang, themePreference: theme }).catch(() => {});
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleSaveTheme = async (theme: Theme) => {
-    setSaving(true);
-    try {
-      await api.put("/users/preferences", { languagePreference: selectedLanguage, themePreference: theme });
-      updatePreferences({ languagePreference: selectedLanguage, themePreference: theme });
-      setSelectedTheme(theme);
-    } catch {} finally { setSaving(false); }
-  };
+  const onLanguage = (lang: Language) => { setSelectedLanguage(lang); save(lang, selectedTheme); };
+  const onTheme = (theme: Theme) => { setSelectedTheme(theme); save(selectedLanguage, theme); };
 
   return (
     <ScrollView style={styles.container}>
       <ThemedCard title="Til sozlamalari">
         {LANGUAGES.map((lang) => (
-          <TouchableOpacity
-            key={lang.code}
-            style={[styles.option, selectedLanguage === lang.code && styles.optionSelected]}
-            onPress={() => handleSaveLanguage(lang.code)}
-            disabled={saving}
-          >
+          <TouchableOpacity key={lang.code} style={[styles.option, selectedLanguage === lang.code && styles.optionSelected]} onPress={() => onLanguage(lang.code)} disabled={saving}>
             <View>
-              <Text style={[styles.optionLabel, selectedLanguage === lang.code && styles.optionLabelSelected]}>
-                {lang.label}
-              </Text>
+              <Text style={[styles.optionLabel, selectedLanguage === lang.code && styles.optionLabelSelected]}>{lang.label}</Text>
               <Text style={styles.optionSub}>{lang.native}</Text>
             </View>
             {selectedLanguage === lang.code && <Badge label="Faol" variant="success" size="sm" />}
@@ -76,15 +63,8 @@ export default function SettingsScreen() {
 
       <ThemedCard title="Mavzu sozlamalari">
         {THEMES.map((theme) => (
-          <TouchableOpacity
-            key={theme.code}
-            style={[styles.option, selectedTheme === theme.code && styles.optionSelected]}
-            onPress={() => handleSaveTheme(theme.code)}
-            disabled={saving}
-          >
-            <Text style={[styles.optionLabel, selectedTheme === theme.code && styles.optionLabelSelected]}>
-              {theme.label}
-            </Text>
+          <TouchableOpacity key={theme.code} style={[styles.option, selectedTheme === theme.code && styles.optionSelected]} onPress={() => onTheme(theme.code)} disabled={saving}>
+            <Text style={[styles.optionLabel, selectedTheme === theme.code && styles.optionLabelSelected]}>{theme.label}</Text>
             {selectedTheme === theme.code && <Badge label="Faol" variant="success" size="sm" />}
           </TouchableOpacity>
         ))}
@@ -111,16 +91,13 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#1a1a2e", padding: 16, paddingTop: 60 },
-  option: {
-    backgroundColor: "#0f3460", borderRadius: 10, padding: 16,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8,
-  },
-  optionSelected: { borderColor: "#2ecc71", borderWidth: 1 },
-  optionLabel: { color: "#fff", fontSize: 16 },
-  optionLabelSelected: { color: "#2ecc71" },
-  optionSub: { color: "#8899aa", fontSize: 13, marginTop: 2 },
-  optionValue: { color: "#8899aa", fontSize: 14 },
-  arrow: { color: "#8899aa", fontSize: 18 },
+const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg, padding: 16, paddingTop: 60 },
+  option: { backgroundColor: c.surfaceAlt, borderRadius: 10, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8, borderWidth: 1, borderColor: "transparent" },
+  optionSelected: { borderColor: c.success },
+  optionLabel: { color: c.textPrimary, fontSize: 16 },
+  optionLabelSelected: { color: c.success, fontWeight: "600" },
+  optionSub: { color: c.textSecondary, fontSize: 13, marginTop: 2 },
+  optionValue: { color: c.textSecondary, fontSize: 14 },
+  arrow: { color: c.textSecondary, fontSize: 18 },
 });

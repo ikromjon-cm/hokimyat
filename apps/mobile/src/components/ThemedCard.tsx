@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from "react-native";
+import { useTheme } from "../theme/ThemeProvider";
 
 interface ThemedCardProps {
   children: ReactNode;
@@ -12,8 +13,10 @@ interface ThemedCardProps {
 }
 
 export default function ThemedCard({ children, title, onPress, style, accentColor, testID = "themed-card", disabled }: ThemedCardProps) {
+  const { colors } = useTheme();
   const containerStyle = [
     styles.card,
+    { backgroundColor: colors.surface },
     accentColor ? { borderLeftWidth: 3, borderLeftColor: accentColor } : undefined,
     disabled && styles.disabled,
     style,
@@ -22,7 +25,7 @@ export default function ThemedCard({ children, title, onPress, style, accentColo
   if (onPress) {
     return (
       <TouchableOpacity style={containerStyle} onPress={onPress} activeOpacity={0.7} disabled={disabled} testID={testID}>
-        {title && <Text style={styles.title}>{title}</Text>}
+        {title && <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>}
         {children}
       </TouchableOpacity>
     );
@@ -30,7 +33,7 @@ export default function ThemedCard({ children, title, onPress, style, accentColo
 
   return (
     <View style={containerStyle} testID={testID}>
-      {title && <Text style={styles.title}>{title}</Text>}
+      {title && <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>}
       {children}
     </View>
   );
@@ -38,7 +41,6 @@ export default function ThemedCard({ children, title, onPress, style, accentColo
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#16213e",
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
@@ -47,7 +49,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#fff",
     marginBottom: 12,
   },
   disabled: { opacity: 0.5 },

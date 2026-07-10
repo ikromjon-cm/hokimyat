@@ -9,6 +9,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Notifications from "expo-notifications";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../theme/ThemeProvider";
 import { RootStackParamList, MainTabParamList } from "./types";
 import linking from "./linking";
 import { captureError } from "../services/sentry";
@@ -56,17 +57,18 @@ const tabIcon = (name: string) =>
   };
 
 function MainTabs() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4d8bf0",
-        tabBarInactiveTintColor: "#7a8499",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
         tabBarStyle: {
-          backgroundColor: "#16213e",
+          backgroundColor: colors.tabBar,
           borderTopWidth: 1,
-          borderTopColor: "#0f3460",
+          borderTopColor: colors.border,
           paddingBottom: 8,
           paddingTop: 6,
           height: 62,
@@ -119,6 +121,7 @@ const styles = StyleSheet.create({
 
 export function AppNavigator() {
   const { isAuthenticated, isLoading } = useAuthStore();
+  const { colors } = useTheme();
   const navigationRef = useNotificationNavigation();
 
   if (isLoading) {
@@ -127,14 +130,15 @@ export function AppNavigator() {
 
   return (
     <ErrorBoundary>
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <NetworkBanner />
         <NavigationContainer ref={navigationRef} linking={linking}>
             <Stack.Navigator
               screenOptions={{
-                headerStyle: { backgroundColor: "#16213e" },
-                headerTintColor: "#fff",
+                headerStyle: { backgroundColor: colors.surface },
+                headerTintColor: colors.textPrimary,
                 headerTitleStyle: { fontWeight: "600" },
+                contentStyle: { backgroundColor: colors.bg },
               }}
             >
               {!isAuthenticated ? (
